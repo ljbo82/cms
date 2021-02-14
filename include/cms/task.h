@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,6 @@
 #include <cms/defs.h>
 #include <cms/monitor.h>
 
-/** 
- * Causes the current task to wait for at least given interval.
- * 
- * @note current task function will return immediately.
- * 
- * @param _millis delay interval in milliseconds.
- */
-#define cms_task_delay(_millis) cms_monitor_wait(NULL, 0, _millis, false)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,11 +30,11 @@ extern "C" {
 /**
  * @brief Represents a task function.
  * 
- * The task function will be called multiple times by scheduler at apropriate moments.
+ * The task function will be called multiple times by scheduler at appropriate moments.
  * 
  * @note The scheduler DOES NOT ensure real time.
- * 
- * @param state state that is preserved across multiple calls of this function. 
+ *
+ * @param state state that is preserved across multiple calls of this function.
  */
 typedef void (*CmsTaskFn)(void* state);
 
@@ -56,7 +47,7 @@ typedef struct CmsTask CmsTask;
  */
 struct CmsTask {
     CmsMonitor monitor;
-    void* __private__;
+    void* __data;
 };
 
 /** 
@@ -76,8 +67,14 @@ CmsTask* cms_task_create(CmsTaskFn taskFn, void* state);
  */
 void cms_task_start_scheduler();
 
-/** @return Returns current task. */
-CmsTask* cms_task_get_current();
+/**
+ * Causes the current task to wait for at least given interval.
+ *
+ * @note current task function will return immediately.
+ *
+ * @param millis delay interval in milliseconds.
+ */
+void cms_task_delay(uint64_t millis);
 
 #ifdef __cplusplus
 } // extern "C"

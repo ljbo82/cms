@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@
 #include <cms/monitor.h>
 #include <cms/task.h>
 
+#include <setjmp.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct CmsTaskPrivate CmsTaskPrivate;
+typedef struct _CmsTaskData _CmsTaskData;
 
-struct CmsTaskPrivate {
+struct _CmsTaskData {
     bool         waiting;
     CmsMonitor*  monitor;
     uint64_t     waitTimestamp;
@@ -34,6 +36,23 @@ struct CmsTaskPrivate {
     CmsTaskFn    taskFn;
     void*        state;
 };
+
+typedef struct _CmsTaskNode     _CmsTaskNode;
+typedef struct _CmsTaskNodeList _CmsTaskNodeList;
+
+struct _CmsTaskNode {
+    _CmsTaskNode* next;
+    CmsTask* task;
+};
+
+struct _CmsTaskNodeList {
+    _CmsTaskNode* first;
+    _CmsTaskNode* last;
+};
+
+extern _CmsTaskNodeList _taskNodeList;
+extern _CmsTaskNode* _currentTaskNode;
+extern jmp_buf _jmpBuf;
 
 #ifdef __cplusplus
 } // extern "C"

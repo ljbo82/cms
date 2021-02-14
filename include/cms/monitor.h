@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,6 @@
 
 #define CMS_MONITOR_ALL_EVENTS UINT8_MAX
 
-/**
- * @brief Causes the current task to wait upon events on given monitor.
- * 
- * @note current task function will return immediately.
- * 
- * @param _monitor monitor. Passing NULL implies a delay (task will wake up only after given interval expired).
- * @param _events waiting events (will be ignored if 'monitor' is NULL).
- * @param _millis maximum timeout in milliseconds on current task waiting for events/delay on given monitor.
- * @param _allEvents defines if either all events at once, or any of given events is a valid condition (will be 
- * ignored if 'monitor' is NULL).
- */
-#define cms_monitor_wait(_monitor, _events, _millis, _allEvents) \
-{ __cms_monitor_wait__(_monitor, _events, _millis, _allEvents); return; }
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,10 +34,19 @@ typedef uint8_t cms_events_t;
 typedef struct CmsMonitor CmsMonitor;
 
 /**
- * @internal
+ * @brief Represents a monitor.
+ *
+ * A monitor is an entity used for synchronization among multiple tasks trough its internal event bitmask.
+ */
+struct CmsMonitor {
+    /** Currently flagged events. */
+    cms_events_t events;
+};
+
+/**
  * @brief Flags the current task to wait upon events on given monitor.
  * 
- * @note this function shall not be called directly. Instead, use macro {@link cms_monitor_wait()}.
+ * @note current task function will return immediately.
  * 
  * @param monitor monitor. Passing NULL implies a delay (task will wake up only after given interval expired).
  * @param events waiting events (will be ignored if 'monitor' is NULL).
@@ -59,17 +54,7 @@ typedef struct CmsMonitor CmsMonitor;
  * @param allEvents defines if either all events at once, or any of given events is a valid condition (will be 
  * ignored if 'monitor' is NULL).
  */
-void __cms_monitor_wait__(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents);
-
-/** 
- * @brief Represents a monitor.
- * 
- * A monitor is an entity used for synchronization among multiple tasks trough its internal event bitmask.
- */
-struct CmsMonitor {
-    /** Currently flagged events. */
-    cms_events_t events;
-};
+void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents);
 
 /**
  * @brief Notifies all tasks waiting for events on given monitor.

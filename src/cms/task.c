@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,6 @@
 
 #include <stdlib.h>
 
-typedef struct CmsTaskNode CmsTaskNode;
-typedef struct CmsTaskNodeList CmsTaskNodeList;
-
-struct CmsTaskNode {
-    CmsTaskNode* next;
-    CmsTask* task;
-};
-
-struct CmsTaskNodeList {
-    CmsTaskNode* first;
-    CmsTaskNode* last;
-};
-
-CmsTaskNodeList taskNodeList = { .first = NULL, .last = NULL };
-CmsTaskNode* currentTaskNode = NULL;
-
 CmsTask* cms_task_create(CmsTaskFn taskFn, void* state) {
     if (taskFn == NULL)
         return NULL;
@@ -41,68 +25,71 @@ CmsTask* cms_task_create(CmsTaskFn taskFn, void* state) {
     CmsTask* newTask = malloc(sizeof(CmsTask));
     newTask->monitor.events = 0;
 
-    CmsTaskPrivate* private = (CmsTaskPrivate*)malloc(sizeof(CmsTaskPrivate));
-    private->waiting = false;
-    private->monitor = &newTask->monitor;
-    private->waitTimestamp = 0;
-    private->waitEvents = 0;
-    private->allEvents = false;
-    private->taskFn = taskFn;
-    private->state = state;
+    _CmsTaskData* data = (_CmsTaskData*)malloc(sizeof(_CmsTaskData));
+    data->waiting = false;
+    data->monitor = &newTask->monitor;
+    data->waitTimestamp = 0;
+    data->waitEvents = 0;
+    data->allEvents = false;
+    data->taskFn = taskFn;
+    data->state = state;
 
-    newTask->__private__ = private;
+    newTask->__data = data;
 
-    CmsTaskNode* newNode = malloc(sizeof(CmsTaskNode));
+    _CmsTaskNode* newNode = malloc(sizeof(_CmsTaskNode));
     newNode->next = NULL;
     newNode->task = newTask;
 
-    if (taskNodeList.last == NULL) {
+    if (_taskNodeList.last == NULL) {
         // Adding first node
-        taskNodeList.first = newNode;
+        _taskNodeList.first = newNode;
     } else {
         // Appending a new node
-        taskNodeList.last->next = newNode;
+        _taskNodeList.last->next = newNode;
     }
     
-    taskNodeList.last = newNode;
+    _taskNodeList.last = newNode;
 
     return newTask;
 }
 
 void cms_task_start_scheduler() {
-    if (taskNodeList.first == NULL)
+    if (_taskNodeList.first == NULL)
         abort();
 
-    currentTaskNode = taskNodeList.first;
+    _currentTaskNode = _taskNodeList.first;
 
     while(true) {
-        CmsTaskPrivate* currentTaskPrivate = (CmsTaskPrivate*)currentTaskNode->task->__private__;
+        _CmsTaskData* currentTaskData = (_CmsTaskData*)_currentTaskNode->task->__data;
 
         bool wakeUp;
         
-        if (!currentTaskPrivate->waiting) {
+        if (!currentTaskData->waiting) {
             wakeUp = true;
         } else {
             uint64_t now = cms_system_timestamp();
 
             // Check for delay/wait timeout:
-            wakeUp = (now - currentTaskPrivate->waitTimestamp) >= currentTaskPrivate->waitTimeout;
+            wakeUp = (now - currentTaskData->waitTimestamp) >= currentTaskData->waitTimeout;
 
             // Check for notifications:
-            if (!wakeUp && currentTaskPrivate->monitor != NULL && currentTaskPrivate->waitEvents != 0)
-                wakeUp = cms_monitor_check_events(currentTaskPrivate->monitor, currentTaskPrivate->waitEvents, currentTaskPrivate->allEvents, false);
+            if (!wakeUp && currentTaskData->monitor != NULL && currentTaskData->waitEvents != 0)
+                wakeUp = cms_monitor_check_events(currentTaskData->monitor, currentTaskData->waitEvents, currentTaskData->allEvents, false);
         }
 
-        if (wakeUp)
-            currentTaskPrivate->taskFn(currentTaskPrivate->state);
+        if (wakeUp) {
+        	if (setjmp(_jmpBuf) == 0) {
+        		currentTaskData->taskFn(currentTaskData->state);
+        	}
+        }
 
-        currentTaskNode = currentTaskNode->next;
+        _currentTaskNode = _currentTaskNode->next;
         
-        if (currentTaskNode == NULL)
-            currentTaskNode = taskNodeList.first;
+        if (_currentTaskNode == NULL)
+            _currentTaskNode = _taskNodeList.first;
     }
 }
 
-CmsTask* cms_task_get_current() {
-    return currentTaskNode == NULL ? NULL : currentTaskNode->task;
+void cms_task_delay(uint64_t millis) {
+	cms_monitor_wait(NULL, 0, millis, false);
 }

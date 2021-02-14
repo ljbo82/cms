@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,21 @@
 
 #include <stdlib.h>
 
-void __cms_monitor_wait__(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
-    CmsTask* task;
-    if ((task = cms_task_get_current()) == NULL) // Scheduler is not running
+void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
+    CmsTask* currentTask;
+    if ((currentTask = _currentTaskNode->task) == NULL) // Scheduler is not running
         abort();
 
-    CmsTaskPrivate* cmsTaskPrivate = (CmsTaskPrivate*)(task->__private__);
+    _CmsTaskData* currentTaskData = (_CmsTaskData*)(currentTask->__data);
 
-    cmsTaskPrivate->waiting = true;
-    cmsTaskPrivate->monitor = monitor;
-    cmsTaskPrivate->waitTimestamp = cms_system_timestamp();
-    cmsTaskPrivate->waitTimeout = millis;
-    cmsTaskPrivate->waitEvents = monitor == NULL ? 0 : events;
-    cmsTaskPrivate->allEvents = monitor == NULL ? false : allEvents;
+    currentTaskData->waiting = true;
+    currentTaskData->monitor = monitor;
+    currentTaskData->waitTimestamp = cms_system_timestamp();
+    currentTaskData->waitTimeout = millis;
+    currentTaskData->waitEvents = monitor == NULL ? 0 : events;
+    currentTaskData->allEvents = monitor == NULL ? false : allEvents;
+
+    longjmp(_jmpBuf, 1);
 }
 
 void cms_monitor_notify(CmsMonitor* monitor, cms_events_t events, bool append) {
