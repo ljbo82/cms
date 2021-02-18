@@ -1,6 +1,6 @@
 # CMS - Cooperative Multitasking Scheduler
 
-This repository contains a simple but useful cooperative multitasking scheduler targeting embedded applications.
+This repository contains a simple but useful cooperative multitasking scheduler targeting embedded applications on platforms with low resources and no MMU.
 
 ## Supported targets
 

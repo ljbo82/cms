@@ -28,9 +28,6 @@
 extern "C" {
 #endif
 
-/** Represents a c-string. */
-typedef const char* cstring_t;
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

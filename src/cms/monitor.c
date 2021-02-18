@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <cms/monitor.h>
-#include <cms/task_private.h>
 #include <cms/system.h>
 
 #include <stdlib.h>
+#include "scheduler_private.h"
 
 void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
-    CmsTask* currentTask;
-    if ((currentTask = _currentTaskNode->task) == NULL) // Scheduler is not running
-        abort();
+	if (_activeScheduler == NULL)
+		return;
 
-    _CmsTaskData* currentTaskData = (_CmsTaskData*)(currentTask->__data);
+	if (_activeScheduler->state == CMS_SCHEDULER_STATE_IDLE) {
+		// Calling from idle task...
+		longjmp(_activeScheduler->jmpBuf, 1);
+	}
 
-    currentTaskData->waiting = true;
-    currentTaskData->monitor = monitor;
-    currentTaskData->waitTimestamp = cms_system_timestamp();
-    currentTaskData->waitTimeout = millis;
-    currentTaskData->waitEvents = monitor == NULL ? 0 : events;
-    currentTaskData->allEvents = monitor == NULL ? false : allEvents;
+    _CmsSchedulerTask* activeTask = _activeScheduler->activeTaskNode->task;
 
-    longjmp(_jmpBuf, 1);
+    activeTask->waiting = true;
+    activeTask->monitor = monitor;
+    activeTask->waitTimestamp = cms_system_timestamp();
+    activeTask->waitTimeout = millis;
+    activeTask->waitEvents = monitor == NULL ? 0 : events;
+    activeTask->allEvents = monitor == NULL ? false : allEvents;
+
+    longjmp(_activeScheduler->jmpBuf, 1);
 }
 
 void cms_monitor_notify(CmsMonitor* monitor, cms_events_t events, bool append) {

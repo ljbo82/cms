@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <cms/task_private.h>
+#include "scheduler_private.h"
 
-_CmsTaskNodeList _taskNodeList = { .first = NULL, .last = NULL };
-_CmsTaskNode* _currentTaskNode = NULL;
-jmp_buf _jmpBuf;
+CmsScheduler* _activeScheduler = NULL;

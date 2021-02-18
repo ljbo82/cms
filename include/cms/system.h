@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Leandro José Britto de Oliveira
+ * Copyright 2021 Leandro José Britto de Oliveira
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,13 @@
 extern "C" {
 #endif
 
-/** @return system timestamp in milliseconds (the reference is platform-dependent). */
+/**
+ * @brief Returns system timestamp in milliseconds.
+ *
+ * @note The granularity of the value depends on the underlying system and may
+ * be larger than a millisecond.
+ *
+ * @return System timestamp in milliseconds. */
 uint64_t cms_system_timestamp();
 
 #ifdef __cplusplus

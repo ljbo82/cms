@@ -11,3 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+ifeq ($(VARIANT), )
+    $(error Missing VARIANT)
+endif
+
+ifneq ($(wildcard hosts/arduino/$(VARIANT).mk), )
+    include hosts/arduino/$(VARIANT).mk
+else
+    $(error Unsupported VARIANT for arduino: $(VARIANT))
+endif
+
+HOST := arduino-$(VARIANT)

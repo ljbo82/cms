@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-/** Event bit flags. */
+/** @brief Event bit flags. */
 typedef uint8_t cms_events_t;
 
 typedef struct CmsMonitor CmsMonitor;
@@ -36,56 +36,80 @@ typedef struct CmsMonitor CmsMonitor;
 /**
  * @brief Represents a monitor.
  *
- * A monitor is an entity used for synchronization among multiple tasks trough its internal event bitmask.
+ * A monitor is an entity used for synchronization among multiple tasks trough
+ * its internal event bitmask.
  */
 struct CmsMonitor {
-    /** Currently flagged events. */
+    /** @brief Currently flagged events. */
     cms_events_t events;
 };
 
 /**
  * @brief Flags the current task to wait upon events on given monitor.
  * 
- * @note current task function will return immediately.
+ * @note Current task function will return immediately to the active scheduler.
  * 
- * @param monitor monitor. Passing NULL implies a delay (task will wake up only after given interval expired).
- * @param events waiting events (will be ignored if 'monitor' is NULL).
- * @param millis maximum timeout in milliseconds on current task waiting for events/delay on given monitor.
- * @param allEvents defines if either all events at once, or any of given events is a valid condition (will be 
- * ignored if 'monitor' is NULL).
+ * @note Calling this function from an idle task is equivalent to call
+ * {@link cms_task_yield()} because it does not make sense to put idle tasks
+ * to wait for either a monitor or a delay (idle tasks are called only when
+ * there is no ready tasks in a scheduler cycle).
+ *
+ * @param monitor Monitor. Passing NULL implies a delay (task will wake up
+ * only after given interval expired. If given interval is zero task yields).
+ *
+ * @param events Waiting events (will be ignored if 'monitor' is NULL).
+ *
+ * @param millis Maximum timeout in milliseconds on current task waiting for
+ * events/delay on given monitor.
+ *
+ * @param allEvents Defines if either all events at once, or any of given
+ * events is a valid condition (will be ignored if 'monitor' is NULL).
  */
-void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents);
+void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events,
+	uint64_t millis, bool allEvents
+);
 
 /**
  * @brief Notifies all tasks waiting for events on given monitor.
  * 
- * @param monitor monitor.
- * @param events events to be set in given monitor.
- * @param append defines if monitor events are preserved and new ones (defined in 'events') will be appended. Passing
- * false will force monitor to have exactly given events.
+ * @param monitor Monitor.
+ *
+ * @param events Events to be set in given monitor.
+ *
+ * @param append Defines if monitor events are preserved and new ones
+ * (defined in 'events') will be appended. Passing false will force monitor
+ * to have exactly given events.
  */
 void cms_monitor_notify(CmsMonitor* monitor, cms_events_t events, bool append);
 
 /**
  * @brief Clears events in given monitor.
  * 
- * @param monitor monitor.
- * @param events events in monitor which shall be cleared.
+ * @param monitor Monitor.
+ *
+ * @param events Events in monitor which shall be cleared.
  */
 void cms_monitor_clear_events(CmsMonitor* monitor, cms_events_t events);
 
 /**
  * @brief Check if given events are present on given monitor.
  * 
- * @param monitor monitor.
- * @param events events to be identified on given monitor (either all or any).
- * @param allEvents defines if all events shall match at once (true) or if any of given events is enough (false).
- * @param clear defines if 'events' shall be cleared from monitor if this function returns true.
+ * @param monitor Monitor.
+ *
+ * @param events Events to be identified on given monitor (either all or any).
+ *
+ * @param allEvents Defines if all events shall match at once (true) or if
+ * any of given events is enough (false).
+ *
+ * @param clear Defines if 'events' shall be cleared from monitor if this
+ * function returns true (i.e. one or more events were matched).
  * 
- * @return a boolean indicating if either 1) one or more events were matched, or 2) all events matched at once in given
- * monitor.
+ * @return A boolean indicating if either 1) one or more events were matched,
+ * or 2) all events matched at once in given monitor.
  */
-bool cms_monitor_check_events(CmsMonitor* monitor, cms_events_t events, bool allEvents, bool clear);
+bool cms_monitor_check_events(CmsMonitor* monitor, cms_events_t events,
+	bool allEvents, bool clear
+);
 
 #ifdef __cplusplus
 } // extern "C"
