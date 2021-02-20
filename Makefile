@@ -15,7 +15,13 @@
 PROJ_NAME := cms0
 PROJ_TYPE := lib
 LIB_TYPE  ?= static
-PRE_BUILD ?= $(if $(HOST),,@echo Missing HOST; exit 1)
+HOST      ?= posix
+
+ifeq ($(HOST), )
+    $(error Missing HOST)
+endif
+
+#PRE_BUILD ?= $(if $(HOST),,@echo Missing HOST; exit 1)
 
 ifneq ($(HOST),)
     ifeq ($(wildcard hosts/$(HOST)/$(HOST).mk), )
@@ -27,9 +33,8 @@ endif
 
 CFLAGS += -std=gnu11 -ffunction-sections -fdata-sections
 
-include c-cpp-project.mk
+include make/c-cpp-posix.mk
 
 .PHONY: show-hosts
 show-hosts:
-	@echo linux
-	@echo arduino
+	@find hosts -maxdepth 1 -type d | grep hosts/ | xargs -I{} basename {}

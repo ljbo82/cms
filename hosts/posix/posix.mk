@@ -12,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GCC_PREFIX := ""
-SRC_DIRS += hosts/linux
+SRC_DIRS += hosts/posix

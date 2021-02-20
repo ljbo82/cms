@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GCC_PREFIX := avr-
+GCC_PREFIX := avr
 SRC_DIRS += hosts/arduino
 
 ifneq ($(wildcard ../../../arduino-avr-core-builder/core-src/cores/arduino), )
@@ -39,4 +39,4 @@ variant     := standard
 INCLUDE_DIRS += $(ARDUINO_CORE_AVR_PATH)/variants/$(variant)
 INCLUDE_DIRS += $(ARDUINO_CORE_AVR_PATH)/cores
 
-EXTRA_CFLAGS := -mmcu=$(build_mcu) -DF_CPU=$(build_f_cpu) -DARDUINO=$(ARDUINO_CORE_AVR_VERSION) -DARDUINO_$(build_board) -DARDUINO_ARCH_$(build_arch)
+override CFLAGS += -mmcu=$(build_mcu) -DF_CPU=$(build_f_cpu) -DARDUINO=$(ARDUINO_CORE_AVR_VERSION) -DARDUINO_$(build_board) -DARDUINO_ARCH_$(build_arch)
