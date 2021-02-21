@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJ_NAME := cms0
+PROJ_NAME := cms
 PROJ_TYPE := lib
 LIB_TYPE  ?= static
 HOST      ?= posix
@@ -21,8 +21,6 @@ ifeq ($(HOST), )
     $(error Missing HOST)
 endif
 
-#PRE_BUILD ?= $(if $(HOST),,@echo Missing HOST; exit 1)
-
 ifneq ($(HOST),)
     ifeq ($(wildcard hosts/$(HOST)/$(HOST).mk), )
         $(error Unsupported HOST: $(HOST))
@@ -30,8 +28,6 @@ ifneq ($(HOST),)
         include hosts/$(HOST)/$(HOST).mk
     endif
 endif
-
-CFLAGS += -std=gnu11 -ffunction-sections -fdata-sections
 
 include make/c-cpp-posix.mk
 
