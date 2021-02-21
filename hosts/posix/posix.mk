@@ -13,3 +13,7 @@
 # limitations under the License.
 
 SRC_DIRS += hosts/posix
+HOST     ?= posix
+LIB_TYPE ?= static
+
+include make/c-cpp-posix.mk

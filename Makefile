@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJ_NAME := cms
-PROJ_TYPE := lib
-LIB_TYPE  ?= static
-HOST      ?= posix
+PROJ_NAME  := cms
+PROJ_TYPE  := lib
+BUILD_BASE ?= build
+HOST       ?= posix
 
 ifeq ($(HOST), )
     $(error Missing HOST)
@@ -28,8 +28,6 @@ ifneq ($(HOST),)
         include hosts/$(HOST)/$(HOST).mk
     endif
 endif
-
-include make/c-cpp-posix.mk
 
 .PHONY: show-hosts
 show-hosts:
