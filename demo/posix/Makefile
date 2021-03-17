@@ -1,4 +1,4 @@
-# Copyright 2020 Leandro José Britto de Oliveira
+# Copyright 2021 Leandro José Britto de Oliveira
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJ_NAME  := cms
-PROJ_TYPE  := lib
-HOST       ?= posix
+PROJ_NAME := blink
+PROJ_TYPE := app
+SRC_DIRS  += .
 
-ifeq ($(wildcard hosts/$(HOST)/$(HOST).mk), )
-    $(error Unsupported HOST: $(HOST))
+CXXFLAGS += -I../../include
+LDFLAGS  += -L../../dist/posix/lib
+
+ifeq ($(DEBUG), 1)
+    LDFLAGS += -lcms0_d
 else
-    include hosts/$(HOST)/$(HOST).mk
+    LDFLAGS += -lcms0
 endif
 
-.PHONY: show-hosts
-show-hosts:
-	@find hosts -maxdepth 1 -type d | grep hosts/ | xargs -I{} basename {}
+# Builds cms library first
+PRE_BUILD += $(MAKE) -C ../.. HOST=posix
+
+include ../../make/arduino-gcc-project-builder/gcc-project-builder/posix-c-cpp-project.mk
+

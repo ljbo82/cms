@@ -16,4 +16,4 @@ SRC_DIRS += hosts/posix
 HOST     ?= posix
 LIB_TYPE ?= static
 
-include make/c-cpp-posix.mk
+include make/arduino-gcc-project-builder/gcc-project-builder/posix-c-cpp-project.mk

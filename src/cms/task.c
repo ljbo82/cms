@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+#include "scheduler_private.h"
+
 #include <cms/task.h>
-#include <cms/monitor.h>
 
 void cms_task_delay(uint64_t millis) {
 	cms_monitor_wait(NULL, 0, millis, false);
@@ -23,4 +24,8 @@ void cms_task_delay(uint64_t millis) {
 
 void cms_task_yield() {
 	cms_task_delay(0);
+}
+
+CmsMonitor* cms_task_get_monitor() {
+	return &_activeScheduler->activeTaskNode->task->internalMonitor;
 }

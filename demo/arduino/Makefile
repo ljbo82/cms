@@ -12,4 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BOARD ?= uno
+PROJ_NAME := blink
+PROJ_TYPE := app
+SRC_DIRS  += .
+BOARD     ?= uno
+
+CXXFLAGS += -I../../include
+LDFLAGS  += -L../../dist/arduino/$(BOARD)/lib 
+
+ifeq ($(DEBUG), 1)
+    LDFLAGS += -lcms0_d
+else
+    LDFLAGS += -lcms0
+endif
+
+# Builds cms library first
+PRE_BUILD := $(MAKE) -C ../.. HOST=arduino BOARD=$(BOARD);
+
+include ../../make/arduino-gcc-project-builder/posix-arduino-project.mk
+

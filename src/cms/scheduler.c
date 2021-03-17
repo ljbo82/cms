@@ -17,6 +17,7 @@
 #include "scheduler_private.h"
 
 #include <cms/system.h>
+
 #include <stdlib.h>
 
 static _CmsSchedulerTask* __cms_scheduler_create_task(CmsTaskFn taskFn, void* state) {
@@ -67,11 +68,13 @@ static bool __cms_scheduler_check_task_ready(_CmsSchedulerTask* task) {
 
 CmsScheduler* cms_scheduler_create(CmsTaskFn idleTaskFn, void* idleTaskState) {
 	CmsScheduler* mScheduler = malloc(sizeof(CmsScheduler));
+	mScheduler->state = CMS_SCHEDULER_STATE_STOPPED;
 	mScheduler->activeTaskNode = NULL;
 	mScheduler->first = NULL;
 	mScheduler->last = NULL;
 	mScheduler->idleTaskFn = idleTaskFn;
 	mScheduler->idleTaskState = idleTaskState;
+
 	return mScheduler;
 }
 
@@ -133,7 +136,7 @@ void cms_scheduler_start(CmsScheduler* scheduler) {
 				mActiveTask->taskFn(mActiveTask->taskState);
 			} else {
 				// Scheduler was stopped or task was put to wait...
-				if (!_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
+				if (_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
 					break; // <-- Prevents idle task from being called when scheduler was stopped.
 				}
 			}
@@ -153,7 +156,7 @@ void cms_scheduler_start(CmsScheduler* scheduler) {
 						_activeScheduler->state = CMS_SCHEDULER_STATE_RUNNING;
 					} else {
 						// Idle task yielded or stopped the scheduler...
-						if (!_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
+						if (_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
 							// Idle task stopped the scheduler...
 							break;
 						} else {
@@ -162,11 +165,11 @@ void cms_scheduler_start(CmsScheduler* scheduler) {
 						}
 					}
 				}
-			} else {
-				// Adjust state for next cycle...
-				mFoundReadyTask = false;
-				mActiveTaskNode = _activeScheduler->first;
 			}
+
+			// Adjust state for next cycle...
+			mFoundReadyTask = false;
+			mActiveTaskNode = _activeScheduler->first;
 		}
 	}
 

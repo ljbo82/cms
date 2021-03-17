@@ -20,7 +20,7 @@
  */
 #pragma once
 
-#include <cms/defs.h>
+#include <cms/monitor.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +41,13 @@ void cms_task_delay(uint64_t millis);
 
 /** @brief Causes the current task function to return the active scheduler. */
 void cms_task_yield();
+
+/**
+ * @brief Returns the internal monitor associated with active task.
+ *
+ * @return The internal monitor associated with active task.
+ */
+CmsMonitor* cms_task_get_monitor();
 
 #ifdef __cplusplus
 } // extern "C"

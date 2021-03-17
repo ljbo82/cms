@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include "scheduler_private.h"
+
 #include <cms/monitor.h>
 #include <cms/system.h>
 
 #include <stdlib.h>
-#include "scheduler_private.h"
 
 void cms_monitor_wait(CmsMonitor* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
 	if (_activeScheduler == NULL)
