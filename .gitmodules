@@ -1,0 +1,3 @@
+[submodule "make/arduino"]
+	path = make/arduino
+	url = https://github.com/ljbo82/arduino-gcc-project-builder
