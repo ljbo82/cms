@@ -17,7 +17,7 @@ PROJ_TYPE := app
 
 cms := cms0
 ifeq ($(DEBUG), 1)
-    cms := $(cms)_d;
+    cms := $(cms)_d
 endif 
 
 BUILD_DEPS   += ../../dist/$(HOST)/lib/lib$(cms).a
