@@ -20,6 +20,9 @@
  */
 #pragma once
 
+#define __STDC_LIMIT_MACROS
+#define __STDC_CONSTANT_MACROS
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

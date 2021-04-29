@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <arduino/Arduino.h>
-
 #include <cms/scheduler.h>
 #include <cms/task.h>
+
+#include <arduino/Arduino.h>
 
 #define EVT1 (1 << 0)
 #define EVT2 (1 << 1)
