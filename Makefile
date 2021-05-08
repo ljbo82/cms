@@ -17,6 +17,8 @@ PROJ_TYPE  := lib
 
 ifeq ($(HOST), )
     include make/arduino/gcc-project/native_host.mk
+    hostOS   := $(nativeOS)
+    hostArch := $(nativeArch)
 else
     ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
         $(error Invalid HOST: $(HOST))
