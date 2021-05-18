@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SRC_DIRS += platforms/arduino
-
-BUILD_DIR_NAME := arduino-$(hostArch)
-DIST_DIR_NAME  := arduino-$(hostArch)
+SRC_DIRS += hosts/arduino
 
 include make/arduino/project.mk
 

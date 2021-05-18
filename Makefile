@@ -20,17 +20,22 @@ ifeq ($(HOST), )
     hostOS   := $(nativeOS)
     hostArch := $(nativeArch)
 else
-    ifeq ($(shell echo $(HOST) | grep -oP '[a-zA-Z0-9]+\-[a-zA-Z0-9]+.*'), )
+    include make/arduino/gcc-project/functions.mk
+    ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
     endif
     hostOS   := $(shell echo $(HOST) | cut -d'-' -f1)
     hostArch := $(shell echo $(HOST) | cut -d'-' -f2-)
 endif
 
-ifeq ($(wildcard platforms/$(hostOS).mk), )
-    $(error Unsupported HOST OS: $(hostOS))
+ifeq ($(wildcard hosts/$(HOST).mk), )
+    ifeq ($(wildcard hosts/$(hostOS).mk), )
+        $(error Unsupported HOST: $(HOST))
+    else
+        include hosts/$(hostOS).mk
+    endif
 else
-    include platforms/$(hostOS).mk
+    include hosts/$(HOST).mk
 endif
 
 # ==============================================================================

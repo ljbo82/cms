@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SRC_DIRS += platforms/linux
+SRC_DIRS += hosts/linux
 LIB_TYPE ?= static
 
 include make/arduino/gcc-project/project.mk
