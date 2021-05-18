@@ -15,7 +15,7 @@
  */
 
 #include <cms/system.h>
-#include <arduino/Arduino.h>
+#include <Arduino.h>
 
 uint64_t cms_system_timestamp() {
     return millis();
