@@ -15,28 +15,39 @@
 PROJ_NAME  := cms
 PROJ_TYPE  := lib
 
+# ------------------------------------------------------------------------------
+include make/arduino/gcc-project/native_host.mk
+include make/arduino/gcc-project/functions.mk
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 ifeq ($(HOST), )
-    include make/arduino/gcc-project/native_host.mk
     hostOS   := $(nativeOS)
     hostArch := $(nativeArch)
 else
-    include make/arduino/gcc-project/functions.mk
     ifeq ($(call fn_host_valid, $(HOST)), 0)
         $(error Invalid HOST: $(HOST))
     endif
-    hostOS   := $(shell echo $(HOST) | cut -d'-' -f1)
-    hostArch := $(shell echo $(HOST) | cut -d'-' -f2-)
+    hostOS   := $(call fn_host_os, $(HOST))
+    hostArch := $(call fn_host_arch, $(HOST))
 endif
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 ifeq ($(wildcard hosts/$(HOST).mk), )
     ifeq ($(wildcard hosts/$(hostOS).mk), )
         $(error Unsupported HOST: $(HOST))
     else
-        include hosts/$(hostOS).mk
+        host_mk := hosts/$(hostOS).mk
     endif
 else
-    include hosts/$(HOST).mk
+    host_mk := hosts/$(HOST).mk
 endif
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+include $(host_mk)
+# ------------------------------------------------------------------------------
 
 # ==============================================================================
 .PHONY: clean-all
