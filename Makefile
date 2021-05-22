@@ -16,37 +16,9 @@ PROJ_NAME  := cms
 PROJ_TYPE  := lib
 
 # ------------------------------------------------------------------------------
-include make/arduino/gcc-project/native_host.mk
-include make/arduino/gcc-project/functions.mk
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(HOST), )
-    hostOS   := $(nativeOS)
-    hostArch := $(nativeArch)
-else
-    ifeq ($(call fn_host_valid, $(HOST)), 0)
-        $(error Invalid HOST: $(HOST))
-    endif
-    hostOS   := $(call fn_host_os, $(HOST))
-    hostArch := $(call fn_host_arch, $(HOST))
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-ifeq ($(wildcard hosts/$(HOST).mk), )
-    ifeq ($(wildcard hosts/$(hostOS).mk), )
-        $(error Unsupported HOST: $(HOST))
-    else
-        host_mk := hosts/$(hostOS).mk
-    endif
-else
-    host_mk := hosts/$(HOST).mk
-endif
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-include $(host_mk)
+ENFORCE_ARDUINO_ONLY := 0
+HOSTS_DIR            := hosts
+include make/project.mk
 # ------------------------------------------------------------------------------
 
 # ==============================================================================

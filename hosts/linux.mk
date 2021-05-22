@@ -15,9 +15,3 @@
 SRC_DIRS += hosts/linux/src
 LIB_TYPE ?= static
 
-# Since this file is included by main Makefile and filename matches
-# builder HOST_MK, skip duplicate include
-SKIP_HOST_MK := 1
-
-include make/arduino/gcc-project/project.mk
-

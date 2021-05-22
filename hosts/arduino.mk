@@ -14,9 +14,3 @@
 
 SRC_DIRS += hosts/arduino/src
 
-# Since this file is included by main Makefile and filename matches
-# builder BOARD_MK, skip duplicate include
-SKIP_BOARD_MK := 1
-
-include make/arduino/project.mk
-
