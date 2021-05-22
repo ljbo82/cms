@@ -20,16 +20,16 @@ ifeq ($(DEBUG), 1)
     cms := $(cms)_d
 endif 
 
-BUILD_DEPS   += ../../dist/arduino-$(BOARD)/lib/lib$(cms).a
-LDFLAGS      += -L../../dist/arduino-$(BOARD)/lib -l$(cms)
-INCLUDE_DIRS += ../../dist/arduino-$(BOARD)/include
+BUILD_DEPS   += ../../dist/$(HOST)/lib/lib$(cms).a
+LDFLAGS      += -L../../dist/$(HOST)/lib -l$(cms)
+INCLUDE_DIRS += ../../dist/$(HOST)/include
 
-include ../../make/arduino/project.mk
+include ../../make/project.mk
 
 # BUILD_DEPS ===================================================================
 ../../dist/arduino-$(BOARD)/lib/lib$(cms).a:
 	@printf "$(nl)[BUILD] $@\n"
 	@rm -f $(buildDir)/$(artifactName) $(distDir)/bin/$(artifactName)
-	$(v)$(MAKE) -C ../.. HOST=arduino-$(BOARD)
+	$(v)$(MAKE) -C ../.. HOST=$(HOST)
 # ==============================================================================
 

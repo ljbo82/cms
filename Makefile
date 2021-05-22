@@ -16,8 +16,15 @@ PROJ_NAME  := cms
 PROJ_TYPE  := lib
 
 # ------------------------------------------------------------------------------
+# Both arduino and linux hosts are supported
 ENFORCE_ARDUINO_ONLY := 0
-HOSTS_DIR            := hosts
+
+# Since builder is 'arduino-gcc-builder', default search directory is 'boards'
+HOSTS_DIR := hosts
+
+# Buil only for hosts with an acceptable makefile in 'hosts' directory
+HOST_MK_REQUIRED := 1
+
 include make/project.mk
 # ------------------------------------------------------------------------------
 

@@ -24,7 +24,8 @@ BUILD_DEPS   += ../../dist/$(HOST)/lib/lib$(cms).a
 LDFLAGS      += -L../../dist/$(HOST)/lib -l$(cms)
 INCLUDE_DIRS += ../../dist/$(HOST)/include
 
-include ../../make/arduino/gcc-project/project.mk
+# NOTE: Uses standard gcc-project-builder instead of arduino layer
+include ../../make/gcc-builder/project.mk
 
 # BUILD_DEPS ===================================================================
 ../../dist/$(HOST)/lib/lib$(cms).a:
