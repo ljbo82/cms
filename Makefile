@@ -14,6 +14,7 @@
 
 PROJ_NAME  := cms
 PROJ_TYPE  := lib
+LIB_TYPE   := static
 
 # ------------------------------------------------------------------------------
 # Both arduino and linux hosts are supported
