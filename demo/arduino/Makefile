@@ -12,24 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJ_NAME := blink
-PROJ_TYPE := app
+PROJ_NAME = blink
+PROJ_TYPE = app
 
-cms := cms0
-ifeq ($(DEBUG), 1)
-    cms := $(cms)_d
-endif 
+cms_libName      = $(shell $(MAKE) -s -C ../.. printvars VARS='ARTIFACT_BASE_NAME')
+cms_artifactName = $(shell $(MAKE) -s -C ../.. printvars VARS='ARTIFACT_NAME')
 
-BUILD_DEPS   += ../../dist/$(HOST)/lib/lib$(cms).a
-LDFLAGS      += -L../../dist/$(HOST)/lib -l$(cms)
-INCLUDE_DIRS += ../../dist/$(HOST)/include
+BUILD_DEPS   += $(O)/libs/cms/dist/$(HOST)/$(cms_artifactName)
+LDFLAGS      += -L$(O)/libs/cms/dist/$(HOST)/lib -l$(cms_libName)
+INCLUDE_DIRS += $(O)/libs/cms/dist/$(HOST)/include
 
 include ../../make/project.mk
 
 # BUILD_DEPS ===================================================================
-../../dist/arduino-$(BOARD)/lib/lib$(cms).a:
+$(O)/libs/cms/dist/$(HOST)/$(cms_artifactName):
 	@printf "$(nl)[BUILD] $@\n"
-	@rm -f $(buildDir)/$(artifactName) $(distDir)/bin/$(artifactName)
-	$(v)$(MAKE) -C ../.. HOST=$(HOST)
+	@rm -f $(buildDir)/$(ARTIFACT_NAME) $(distDir)/bin/$(ARTIFACT_NAME)
+	$(v)$(MAKE) -C ../.. HOST=$(HOST) O=$(abspath $(O))/libs/cms
 # ==============================================================================
 
