@@ -66,8 +66,8 @@ static void listen_task(void* s) {
 int main() {
 	scheduler = cms_scheduler_create(nullptr, nullptr);
 	CmsMonitor* mListenTaskMonitor = cms_scheduler_add_task(scheduler, listen_task, nullptr);
-    cms_scheduler_add_task(scheduler, led_task, nullptr);
-    cms_scheduler_add_task(scheduler, notify_task, mListenTaskMonitor);
+	cms_scheduler_add_task(scheduler, led_task, nullptr);
+	cms_scheduler_add_task(scheduler, notify_task, mListenTaskMonitor);
 	cms_scheduler_start(scheduler);
 	cms_scheduler_destroy(scheduler);
 	abort();
