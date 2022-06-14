@@ -1,40 +1,44 @@
 /*
- * Copyright 2021 Leandro José Britto de Oliveira
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Copyright (c) 2022 Leandro José Britto de Oliveira
 
-#include <cms/scheduler.h>
-#include <cms/task.h>
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+#include <cms/cms.h>
 
 #include <iostream>
 
 #define EVT1 (1 << 0)
 #define EVT2 (1 << 1)
 
-CmsScheduler* scheduler = nullptr;
-
-static void led_task(void* state) {
+static void led_task(void* data) {
 	static bool mLedState = false;
 	std::cout << "[LED] " << (mLedState ? "ON" : "OFF") << std::endl;
 	mLedState = !mLedState;
 	cms_task_delay(1000);
 }
 
-static void notify_task(void* state) {
-	CmsMonitor* mListenTaskMonitor = (CmsMonitor*)state;
+static void notify_task(void* data) {
+	cms_monitor_t* mListenTaskMonitor = (cms_monitor_t*)data;
 
 	static int mNotifyState = 0;
+
 	if (mNotifyState != 0 && mNotifyState % 10 == 0)
 		cms_monitor_notify(mListenTaskMonitor, EVT1, true);
 
@@ -46,11 +50,11 @@ static void notify_task(void* state) {
 
 	std::cout << "[NOTIFY] counter: " << mNotifyState << std::endl;
 	mNotifyState++;
-	cms_task_delay(2000);
+	cms_task_delay(1000);
 }
 
 static void listen_task(void* s) {
-	CmsMonitor* mListenTaskMonitor = cms_task_get_monitor();
+	cms_monitor_t* mListenTaskMonitor = cms_task_get_monitor();
 
 	if (cms_monitor_check_events(mListenTaskMonitor, EVT1, false, false))
 		std::cout << "[LISTEN] Notified EVT1" << std::endl;
@@ -64,11 +68,9 @@ static void listen_task(void* s) {
 }
 
 int main() {
-	scheduler = cms_scheduler_create(nullptr, nullptr);
-	CmsMonitor* mListenTaskMonitor = cms_scheduler_add_task(scheduler, listen_task, nullptr);
-	cms_scheduler_add_task(scheduler, led_task, nullptr);
-	cms_scheduler_add_task(scheduler, notify_task, mListenTaskMonitor);
-	cms_scheduler_start(scheduler);
-	cms_scheduler_destroy(scheduler);
+	cms_monitor_t* mListenTaskMonitor = cms_scheduler_create_task(listen_task, nullptr, nullptr);
+	cms_scheduler_create_task(led_task, nullptr, nullptr);
+	cms_scheduler_create_task(notify_task, mListenTaskMonitor, nullptr);
+	cms_scheduler_start();
 	abort();
 }

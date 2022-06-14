@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debug-demo",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/linux/output/linux-x64/debug/dist/bin/blink0",
+            "cwd": "${workspaceFolder}/demo/linux",
+            "args": [],
+            "stopAtEntry": true,
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build-demo"
+        }
+    ]
+}

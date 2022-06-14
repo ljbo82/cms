@@ -1,18 +1,24 @@
 /*
-    Copyright 2021 Leandro José Britto de Oliveira
+Copyright (c) 2022 Leandro José Britto de Oliveira
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
- */
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include "scheduler_private.h"
 
@@ -20,25 +26,7 @@
 
 #include <stdlib.h>
 
-static _CmsSchedulerTask* __cms_scheduler_create_task(CmsTaskFn taskFn, void* state) {
-	if (taskFn == NULL)
-		return NULL;
-
-	_CmsSchedulerTask* mNewTask = malloc(sizeof(_CmsSchedulerTask));
-	mNewTask->internalMonitor.events = 0;
-	mNewTask->waiting = false;
-	mNewTask->monitor = NULL;
-	mNewTask->waitTimestamp = 0;
-	mNewTask->waitTimeout = 0;
-	mNewTask->waitEvents = 0;
-	mNewTask->allEvents = false;
-	mNewTask->taskFn = taskFn;
-	mNewTask->taskState = state;
-
-	return mNewTask;
-}
-
-static bool __cms_scheduler_check_task_ready(_CmsSchedulerTask* task) {
+static bool __is_task_ready(_cms_scheduler_task_t* task) {
 	bool mWakeUp;
 
 	if (!task->waiting) {
@@ -66,121 +54,90 @@ static bool __cms_scheduler_check_task_ready(_CmsSchedulerTask* task) {
 	return mWakeUp;
 }
 
-CmsScheduler* cms_scheduler_create(CmsTaskFn idleTaskFn, void* idleTaskState) {
-	CmsScheduler* mScheduler = malloc(sizeof(CmsScheduler));
-	mScheduler->state = CMS_SCHEDULER_STATE_STOPPED;
-	mScheduler->activeTaskNode = NULL;
-	mScheduler->first = NULL;
-	mScheduler->last = NULL;
-	mScheduler->idleTaskFn = idleTaskFn;
-	mScheduler->idleTaskState = idleTaskState;
+static void __do_cleanup() {
+	_cms_scheduler_task_node_t* mNode = _scheduler->first;
+	while (mNode != NULL) {
+		if (mNode->task->destructor)
+			mNode->task->destructor(mNode->task->data);
 
-	return mScheduler;
+		free(mNode->task);
+		_cms_scheduler_task_node_t* mNextNode = mNode->next;
+		free(mNode);
+		mNode = mNextNode;
+	}
+
+	_scheduler->first          = NULL;
+	_scheduler->last           = NULL;
+	_scheduler->activeTaskNode = NULL;
 }
 
-CmsMonitor* cms_scheduler_add_task(CmsScheduler* scheduler, CmsTaskFn taskFn, void* taskState) {
-	if (scheduler == NULL || taskFn == NULL)
+DLL_PUBLIC cms_monitor_t* cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
+	_cms_scheduler_task_t* mTask = malloc(sizeof(_cms_scheduler_task_t));
+	if (taskFn == NULL)
 		return NULL;
 
-	_CmsSchedulerTask* mTask = __cms_scheduler_create_task(taskFn, taskState);
+	mTask->internalMonitor.events = 0;
+	mTask->waiting = false;
+	mTask->monitor = NULL;
+	mTask->waitTimestamp = 0;
+	mTask->waitTimeout = 0;
+	mTask->waitEvents = 0;
+	mTask->allEvents = false;
+	mTask->taskFn = taskFn;
+	mTask->data = taskData;
+	mTask->destructor = destructor;
 
-	_CmsSchedulerTaskNode* mNode = malloc(sizeof(_CmsSchedulerTaskNode));
+	_cms_scheduler_task_node_t* mNode = malloc(sizeof(_cms_scheduler_task_node_t));
 	mNode->next = NULL;
 	mNode->task = mTask;
 
-	if (scheduler->last == NULL) {
+	if (_scheduler->last == NULL) {
 		// Adding first node
-		scheduler->first = mNode;
+		_scheduler->first = mNode;
 	} else {
 		// Appending a new node
-		scheduler->last->next = mNode;
+		_scheduler->last->next = mNode;
 	}
 
-	scheduler->last = mNode;
+	_scheduler->last = mNode;
 
 	return &mTask->internalMonitor;
 }
 
-void cms_scheduler_destroy(CmsScheduler* scheduler) {
-	if (scheduler == NULL)
-		return;
+DLL_PUBLIC bool cms_scheduler_start() {
+	if (_scheduler->running || _scheduler->first == NULL)
+		return false;
 
-	_CmsSchedulerTaskNode* mNode = scheduler->first;
-	while (mNode != NULL) {
-		free(mNode->task);
-		_CmsSchedulerTaskNode* mNextNode = mNode->next;
-		free(mNode);
-		mNode = mNextNode;
-	}
-}
+	_scheduler->running = true;
 
-void cms_scheduler_start(CmsScheduler* scheduler) {
-	if (scheduler == NULL || scheduler->first == NULL || scheduler->state != CMS_SCHEDULER_STATE_STOPPED)
-		return;
+	_cms_scheduler_task_node_t* mActiveTaskNode = _scheduler->first;
 
-	CmsScheduler* mActiveSchedulerBackup = _activeScheduler;
+	while(_scheduler->running) {
+		_scheduler->activeTaskNode = mActiveTaskNode;
+		_cms_scheduler_task_t* mActiveTask = _scheduler->activeTaskNode->task;
 
-	_activeScheduler = scheduler;
-	_activeScheduler->state = CMS_SCHEDULER_STATE_RUNNING;
-
-	_CmsSchedulerTaskNode* mActiveTaskNode = _activeScheduler->first;
-	bool mFoundReadyTask = false;
-
-	while(_activeScheduler->state == CMS_SCHEDULER_STATE_RUNNING) {
-		_activeScheduler->activeTaskNode = mActiveTaskNode;
-		_CmsSchedulerTask* mActiveTask = _activeScheduler->activeTaskNode->task;
-
-		if (__cms_scheduler_check_task_ready(mActiveTask)) {
-			mFoundReadyTask = true;
-			if (setjmp(_activeScheduler->jmpBuf) == 0) {
-				mActiveTask->taskFn(mActiveTask->taskState);
-			} else {
-				// Scheduler was stopped or task was put to wait...
-				if (_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
-					break; // <-- Prevents idle task from being called when scheduler was stopped.
-				}
+		if (__is_task_ready(mActiveTask)) {
+			if (setjmp(_scheduler->jmpBuf) == 0) {
+				mActiveTask->taskFn(mActiveTask->data);
 			}
 		}
 
 		mActiveTaskNode = mActiveTaskNode->next;
 
 		if (mActiveTaskNode == NULL) {
-			// End of scheduler cycle...
-			if (!mFoundReadyTask) {
-				// Idle cycle detected...
-				if (_activeScheduler->idleTaskFn != NULL) {
-					_activeScheduler->state = CMS_SCHEDULER_STATE_IDLE; // <-- Setting idle state makes sense only when there is an idle task
+			// End of scheduler cycle, adjust state for next cycle...
+			mActiveTaskNode = _scheduler->first;
 
-					if (setjmp(_activeScheduler->jmpBuf) == 0) {
-						_activeScheduler->idleTaskFn(_activeScheduler->idleTaskState);
-						_activeScheduler->state = CMS_SCHEDULER_STATE_RUNNING;
-					} else {
-						// Idle task yielded or stopped the scheduler...
-						if (_activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED) {
-							// Idle task stopped the scheduler...
-							break;
-						} else {
-							// Idle task yielded...
-							_activeScheduler->state = CMS_SCHEDULER_STATE_RUNNING;
-						}
-					}
-				}
-			}
-
-			// Adjust state for next cycle...
-			mFoundReadyTask = false;
-			mActiveTaskNode = _activeScheduler->first;
+			// Allows system to process extern events...
+			cmd_system_process_events();
 		}
 	}
 
-	// Scheduler is stopping...
-	_activeScheduler = mActiveSchedulerBackup; // <-- Restores previous active scheduler.
+	__do_cleanup();
+
+	return true;
 }
 
-void cms_scheduler_stop() {
-	if (_activeScheduler == NULL || _activeScheduler->state == CMS_SCHEDULER_STATE_STOPPED)
-		return;
-
-	_activeScheduler->state = CMS_SCHEDULER_STATE_STOPPED;
-	longjmp(_activeScheduler->jmpBuf, 1);
+DLL_PUBLIC void cms_scheduler_stop() {
+	_scheduler->running = false;
 }

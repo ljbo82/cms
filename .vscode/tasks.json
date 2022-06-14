@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-demo",
+            "detail": "Builds demo application",
+            "type": "shell",
+            "options": { "cwd": "demo/linux" },
+            "command": "make DEBUG=1 V=1",
+            "group": "build",
+        },
+        {
+            "label": "clean-demo",
+            "detail": "Clean for demo application",
+            "type": "shell",
+            "options": { "cwd": "demo/linux" },
+            "command": "make clean V=1",
+            "group": "build"
+        }
+    ]
+}

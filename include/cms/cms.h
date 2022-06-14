@@ -19,21 +19,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "scheduler_private.h"
+/**
+ * @file
+ * @brief Global header.
+ */
+#pragma once
 
+#include <cms/system.h>
+#include <cms/scheduler.h>
 #include <cms/task.h>
 
-DLL_PUBLIC void cms_task_delay(uint64_t millis) {
-	cms_monitor_wait(NULL, 0, millis, false);
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-DLL_PUBLIC void cms_task_yield() {
-	cms_task_delay(0);
-}
-
-DLL_PUBLIC cms_monitor_t* cms_task_get_monitor() {
-	if (_scheduler->activeTaskNode == NULL)
-		return NULL;
-
-	return &_scheduler->activeTaskNode->task->internalMonitor;
-}
+#ifdef __cplusplus
+} // extern "C"
+#endif

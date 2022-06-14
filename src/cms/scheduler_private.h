@@ -1,18 +1,24 @@
 /*
-    Copyright 2021 Leandro José Britto de Oliveira
+Copyright (c) 2022 Leandro José Britto de Oliveira
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
- */
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 /**
  * @file
@@ -24,23 +30,25 @@
 
 #include <setjmp.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/** @brief Represents a scheduler task. */
+typedef struct _cms_scheduler_task _cms_scheduler_task_t;
 
-/** @brief Task data. */
-typedef struct _CmsSchedulerTask _CmsSchedulerTask;
+/** @brief Node in a task list. */
+typedef struct _cms_scheduler_task_node _cms_scheduler_task_node_t;
 
-/** @brief Task data. */
-struct _CmsSchedulerTask {
+/** @brief Represents a scheduler. */
+typedef struct _cms_scheduler _cms_scheduler_t;
+
+/** @brief Represents a scheduler task. */
+struct _cms_scheduler_task {
 	/** @brief Internal monitor. */
-	CmsMonitor internalMonitor;
+	cms_monitor_t internalMonitor;
 
 	/** @brief Is task waiting? */
 	bool waiting;
 
 	/** @brief Monitor on which this task is waiting. */
-    CmsMonitor*  monitor;
+    cms_monitor_t* monitor;
 
     /** @brief Timestamp when wait was requested for this task. */
     uint64_t waitTimestamp;
@@ -53,62 +61,53 @@ struct _CmsSchedulerTask {
 
     /**
      * @brief Defines if all events shall match at once in order to wake up
-     * this task.
+     *        this task.
      */
     bool allEvents;
 
     /** @brief Task function. */
-    CmsTaskFn taskFn;
-
-    /** @brief Task state. */
-    void* taskState;
-};
-
-/** @brief Node in a task list. */
-typedef struct _CmsSchedulerTaskNode _CmsSchedulerTaskNode;
-
-/** @brief Node in a task list. */
-struct _CmsSchedulerTaskNode {
-	/** @brief Next task in the list. */
-	_CmsSchedulerTaskNode* next;
+    cms_task_fn taskFn;
 
     /** @brief Task data. */
-    _CmsSchedulerTask* task;
+    void* data;
+
+	/** @brief Destructor function. */
+	cms_destructor_fn destructor;
 };
 
-/** @brief Scheduler state. */
-typedef enum _CmsSchedulerState {
-	CMS_SCHEDULER_STATE_STOPPED = 0,
-	CMS_SCHEDULER_STATE_RUNNING = 1,
-	CMS_SCHEDULER_STATE_IDLE = 2
-}_CmsSchedulerState;
+/** @brief Node in a task list. */
+struct _cms_scheduler_task_node {
+	/** @brief Next task in the list. */
+	_cms_scheduler_task_node_t* next;
 
-// Documented in public header
-struct CmsScheduler {
-	/** @brief Scheduler state. */
-	_CmsSchedulerState state;
+    /** @brief Task data. */
+    _cms_scheduler_task_t* task;
+};
 
-	/** @brief Idle task function. */
-	CmsTaskFn idleTaskFn;
-
-	/** @brief Idle task state. */
-	void* idleTaskState;
-
+/** @brief Represents a scheduler. */
+struct _cms_scheduler {
 	/** @brief First task node in the list. */
-	_CmsSchedulerTaskNode* first;
+	_cms_scheduler_task_node_t* first;
 
 	/** @brief Last task node in the list. */
-	_CmsSchedulerTaskNode* last;
+	_cms_scheduler_task_node_t* last;
 
     /** @brief Scheduler jump context. */
     jmp_buf jmpBuf;
 
     /** @brief Active task for this scheduler. */
-    _CmsSchedulerTaskNode* activeTaskNode;
+    _cms_scheduler_task_node_t* activeTaskNode;
+
+	/** @brief Defines if the scheduler is running. */
+	bool running;
 };
 
 /** @brief Active scheduler. */
-extern CmsScheduler* _activeScheduler;
+extern _cms_scheduler_t* _scheduler;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __cplusplus
 } // extern "C"

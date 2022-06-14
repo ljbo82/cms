@@ -8,7 +8,7 @@ Currently only Arduino boards are supported, although adding support for other t
 
 ## Licensing
 
-This project is licensed under the Apache License 2.0. See the files called LICENSE and NOTICE for more information.
+This project is distributed under MIT License. Please see the [LICENSE](LICENSE) file for details on copying and distribution.
 
 ## Contact
 

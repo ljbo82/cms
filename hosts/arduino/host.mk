@@ -18,23 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PROJ_NAME = blink
-PROJ_TYPE = app
+ifeq ($(ARDUINO_CORE_DIR),)
+    $(error [ARDUINO_CORE_DIR] Mising value)
+endif
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS      += -L$(O_DIST_DIR)/lib -lcms0
+LDFLAGS      += -L$(O_DIST_DIR)/lib -larduino-core1
 
-PRE_BUILD_DEPS += cms
-
-# Library source directory
-CMS_DIR ?= ../..
+PRE_BUILD_DEPS += arduino-core
 
 # ==============================================================================
-.PHONY: cms
-cms:
+.PHONY: arduino-core
+arduino-core:
     # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(CMS_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(CMS_DIR) $(O))
+	$(O_VERBOSE)$(MAKE) -C $(ARDUINO_CORE_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(ARDUINO_CORE_DIR) $(O))
 # ==============================================================================
-
-include ../../make/builder.mk
-

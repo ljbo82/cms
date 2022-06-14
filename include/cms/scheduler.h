@@ -1,18 +1,24 @@
 /*
-    Copyright 2021 Leandro José Britto de Oliveira
+Copyright (c) 2022 Leandro José Britto de Oliveira
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
- */
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 /**
  * @file
@@ -22,10 +28,6 @@
 
 #include <cms/monitor.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief Represents a task function.
  *
@@ -33,85 +35,71 @@ extern "C" {
  * appropriate moments.
  *
  * @note Since the scheduler is cooperative, real-time achievement is up to
- * application implementation.
+ *       application implementation.
  *
- * @param state state that is preserved across multiple calls of this function.
+ * @param data Data defined during task creation.
  */
-typedef void (*CmsTaskFn)(void* state);
-
-/** Represents a scheduler. */
-typedef struct CmsScheduler CmsScheduler;
+typedef void (*cms_task_fn)(void* data);
 
 /**
- * @brief Creates a cooperative scheduler.
+ * @brief Represents a destructor function.
  *
- * @note Although a scheduler can be created at any moment, it's recommended to
- * create one during application startup in order to prevent heap fragmentation.
- *
- * @note Usually a scheduler never stops once started. If a implementation
- * requires a scheduler to stop (through a call to {@link cms_scheduler_stop()},
- * and scheduler is no longer required, it must be destroyed (through a call to
- * {@link cms_scheduler_destroy()} in order to release allocated resources.
- *
- * @note Although multiples schedulers can be created, only one can be active
- * at a time.
- *
- * @param idleTaskfn Optional pointer to a function to be
- * called when scheduler is idle (i.e. there is no task ready to be called
- * during a scheduler cycle.
- *
- * @param idleTaskState Optional pointer to data which will be passed to idle
- * task on each call.
- *
- * @return Handler for created scheduler.
+ * @param data Data to be destroyed.
  */
-CmsScheduler* cms_scheduler_create(CmsTaskFn idleTaskfn, void* idleTaskState);
+typedef void (*cms_destructor_fn)(void* data);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Adds a task to a scheduler.
+ * @brief Adds a new task to the scheduler.
  *
  * Although tasks can added to a scheduler at any moment, it's recommended to
  * register tasks during application startup in order to prevent heap
  * fragmentation.
  *
- * @param scheduler Associated scheduler.
- *
  * @param taskFn Pointer to task function.
  *
- * @param taskState Optional pointer to data which will be passed to given task
- * on each call.
+ * @param taskData Optional data which will be passed to given task function
+ *        on each call.
+ *
+ * @param destructor Optional function to be called when task is being
+ *        destroyed in order to release allocated resources (usually
+ *        {@code taskData}).
  *
  * @return Task internal monitor.
  */
-CmsMonitor* cms_scheduler_add_task(CmsScheduler* scheduler, CmsTaskFn taskFn,
-	void* taskState);
+DLL_PUBLIC cms_monitor_t* cms_scheduler_create_task(
+	cms_task_fn taskFn,
+	void* taskData,
+	cms_destructor_fn destructor
+);
 
 /**
- * @brief Destroys a scheduler.
+ * @brief Starts the scheduler.
  *
- * This function will release any allocated resources during scheduler creation.
+ * A scheduler is intended to execute indefintely until a
+ * {@link cms_scheduler_stop signal was emitted}.
  *
- * @param scheduler Handler for a scheduler.
+ * When a scheduler finishes its execution, all assciated tasks will be
+ * destroyed releasing all allocated resources.
+ *
+ * @return {@code true} if scheduler was started and was stopped (NOTE:
+ *         This function will not return until {@link cms_scheduler_stop()} was
+ *         called). If schedule is already running or scheduler has no
+ *         associated tasks, this function will do nothing and will
+ *    {@code false}.
  */
-void cms_scheduler_destroy(CmsScheduler* scheduler);
+DLL_PUBLIC bool cms_scheduler_start();
 
 /**
- * @brief Starts a scheduler.
+ * @brief Singals the scheduler to stop.
  *
- * @note this function will not return until {@link cms_scheduler_stop()} is
- * called by either a {@link task.h task} or an {@link CmsSchedulerIdleFn idle
- * function}.
- *
- * @param scheduler Handler for the scheduler to be started.
+ * @note This function returns immediatelly. It just signals the scheduler to
+ * stop.
  */
-void cms_scheduler_start(CmsScheduler* scheduler);
-
-/**
- * @brief Stops active scheduler.
- *
- * @note Current task will return immediately.
- */
-void cms_scheduler_stop();
+DLL_PUBLIC void cms_scheduler_stop();
 
 #ifdef __cplusplus
 } // extern "C"
