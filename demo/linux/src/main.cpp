@@ -53,7 +53,7 @@ static void notify_task(void* data) {
 	cms_task_delay(1000);
 }
 
-static void listen_task(void* s) {
+static void listen_task(void* data) {
 	cms_monitor_t* mListenTaskMonitor = cms_task_get_monitor();
 
 	if (cms_monitor_check_events(mListenTaskMonitor, EVT1, false, false))

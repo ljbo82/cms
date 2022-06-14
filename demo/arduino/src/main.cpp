@@ -27,15 +27,15 @@ SOFTWARE.
 #define EVT1 (1 << 0)
 #define EVT2 (1 << 1)
 
-static void led_task(void* state) {
+static void led_task(void* data) {
 	static bool mState = false;
 	digitalWrite(LED_BUILTIN, mState ? HIGH : LOW);
 	mState = !mState;
 	cms_task_delay(500);
 }
 
-static void notify_task(void* state) {
-	cms_monitor_t* mListenTaskMonitor = (cms_monitor_t*)state;
+static void notify_task(void* data) {
+	cms_monitor_t* mListenTaskMonitor = (cms_monitor_t*)data;
 
 	static int mState = 0;
 	if (mState != 0 && mState % 10 == 0)
@@ -54,7 +54,7 @@ static void notify_task(void* state) {
 	cms_task_delay(1000);
 }
 
-static void listen_task(void* s) {
+static void listen_task(void* data) {
 	cms_monitor_t* mListenTaskMonitor = cms_task_get_monitor();
 
 	if (cms_monitor_check_events(mListenTaskMonitor, EVT1, false, false))
