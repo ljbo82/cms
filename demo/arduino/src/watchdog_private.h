@@ -20,13 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "scheduler_private.h"
+#pragma once
 
-static _cms_scheduler_t __scheduler = {
-	.first          = NULL,
-	.last           = NULL,
-	.activeTaskNode = NULL,
-	.running        = false
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-_cms_scheduler_t* _scheduler = &__scheduler;
+/**
+ * @brief Initializes the watchdog.
+ *
+ * @note Implementation is platform-dependent (it is expected a timeout of
+ * at least a second).
+ */
+void _watchdog_init();
+
+/**
+ * @brief Resets the watchdog.
+ *
+ * @note Implementation is platform-dependent.
+ */
+void _watchdog_reset();
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

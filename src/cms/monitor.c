@@ -28,40 +28,40 @@ SOFTWARE.
 #include <stdlib.h>
 
 DLL_PUBLIC void cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
-    _cms_scheduler_task_t* activeTask = _scheduler->activeTaskNode == NULL ? NULL : _scheduler->activeTaskNode->task;
+	cms_task_t* activeTask = cms_scheduler_get_active_task();
 
 	if (activeTask == NULL)
 		return;
 
-    activeTask->waiting = true;
-    activeTask->monitor = monitor;
-    activeTask->waitTimestamp = cms_system_timestamp();
-    activeTask->waitTimeout = millis;
-    activeTask->waitEvents = monitor == NULL ? 0 : events;
-    activeTask->allEvents = monitor == NULL ? false : allEvents;
+	activeTask->waiting = true;
+	activeTask->monitor = monitor;
+	activeTask->waitTimestamp = cms_system_timestamp();
+	activeTask->waitTimeout = millis;
+	activeTask->waitEvents = monitor == NULL ? 0 : events;
+	activeTask->allEvents = monitor == NULL ? false : allEvents;
 
-    longjmp(_scheduler->jmpBuf, 1);
+	longjmp(_scheduler->jmpBuf, 1);
 }
 
 DLL_PUBLIC void cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, bool append) {
-    if (append) {
-        monitor->events |= events;
-    } else {
-        monitor->events = events;
-    }
+	if (append) {
+		monitor->events |= events;
+	} else {
+		monitor->events = events;
+	}
 }
 
 DLL_PUBLIC void cms_monitor_clear_events(cms_monitor_t* monitor, cms_events_t events) {
-    monitor->events &= ~events;
+	monitor->events &= ~events;
 }
 
 DLL_PUBLIC bool cms_monitor_check_events(cms_monitor_t* monitor, cms_events_t events, bool allEvents, bool clear) {
-    cms_events_t matchedEvents = (monitor->events & events);
+	cms_events_t matchedEvents = (monitor->events & events);
 
-    if (matchedEvents != 0) {
-        if (allEvents && matchedEvents != events) {
-            matchedEvents = 0;
-        }
+	if (matchedEvents != 0) {
+		if (allEvents && matchedEvents != events) {
+			matchedEvents = 0;
+		}
 	}
 
 	if (matchedEvents != 0 && clear)

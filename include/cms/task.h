@@ -35,7 +35,7 @@ extern "C" {
 /**
  * @brief Causes the current task to wait for at least given interval.
  *
- * @note Current task function will return immediately to the scheduler.
+ * @note Execution will immediately return to the scheduler.
  *
  * @param millis Delay interval in milliseconds. Passing zero is equivalent
  *        to {@link cms_task_yield()}.
@@ -44,15 +44,8 @@ DLL_PUBLIC void cms_task_delay(
 	uint64_t millis
 );
 
-/** @brief Causes the current task function to return to the scheduler. */
+/** @brief Causes the execution to return to the scheduler. */
 DLL_PUBLIC void cms_task_yield();
-
-/**
- * @brief Returns the internal monitor associated with active task.
- *
- * @return The internal monitor associated with active task.
- */
-DLL_PUBLIC cms_monitor_t* cms_task_get_monitor();
 
 #ifdef __cplusplus
 } // extern "C"

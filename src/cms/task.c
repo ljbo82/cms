@@ -30,10 +30,3 @@ DLL_PUBLIC void cms_task_delay(uint64_t millis) {
 DLL_PUBLIC void cms_task_yield() {
 	cms_task_delay(0);
 }
-
-DLL_PUBLIC cms_monitor_t* cms_task_get_monitor() {
-	if (_scheduler->activeTaskNode == NULL)
-		return NULL;
-
-	return &_scheduler->activeTaskNode->task->internalMonitor;
-}

@@ -48,6 +48,9 @@ typedef void (*cms_task_fn)(void* data);
  */
 typedef void (*cms_destructor_fn)(void* data);
 
+/** @brief Task handler. */
+typedef struct _cms_scheduler_task cms_task_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,9 +71,9 @@ extern "C" {
  *        destroyed in order to release allocated resources (usually
  *        {@code taskData}).
  *
- * @return Task internal monitor.
+ * @return Created task handler or {@code NULL} on failure.
  */
-DLL_PUBLIC cms_monitor_t* cms_scheduler_create_task(
+DLL_PUBLIC cms_task_t* cms_scheduler_create_task(
 	cms_task_fn taskFn,
 	void* taskData,
 	cms_destructor_fn destructor
@@ -89,17 +92,24 @@ DLL_PUBLIC cms_monitor_t* cms_scheduler_create_task(
  *         This function will not return until {@link cms_scheduler_stop()} was
  *         called). If schedule is already running or scheduler has no
  *         associated tasks, this function will do nothing and will
- *    {@code false}.
+ *         {@code false}.
  */
 DLL_PUBLIC bool cms_scheduler_start();
 
 /**
- * @brief Singals the scheduler to stop.
+ * @brief Returns the active task.
  *
- * @note This function returns immediatelly. It just signals the scheduler to
- * stop.
+ * @return Active task handler. If scheduler is not running, returns
+ *         {@code NULL}.
  */
-DLL_PUBLIC void cms_scheduler_stop();
+DLL_PUBLIC cms_task_t* cms_scheduler_get_active_task();
+
+/**
+ * @brief Stops scheduler.
+ *
+ * @param now Defines if scheduler shall stop immediately.
+ */
+DLL_PUBLIC void cms_scheduler_stop(bool now);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -53,7 +53,7 @@ extern "C" {
 /**
  * @brief Flags the current task to wait upon events on given monitor.
  *
- * @note Current task function will immediately return to the scheduler.
+ * @note Execution will immediately return to the scheduler.
  *
  * @param monitor Monitor. Passing {@code NULL} implies a delay (task will
  *        wake up only after given interval expired. If given interval is

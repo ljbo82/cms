@@ -20,60 +20,83 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include "watchdog_private.h"
+
 #include <cms/cms.h>
 
 #include <Arduino.h>
 
-#define EVT1 (1 << 0)
-#define EVT2 (1 << 1)
+#define EVT1     (1 << 0)
+#define EVT2     (1 << 1)
+#define EVT_STOP (1 << 2)
 
-static void led_task(void* data) {
-	static bool mState = false;
-	digitalWrite(LED_BUILTIN, mState ? HIGH : LOW);
-	mState = !mState;
+static cms_monitor_t __listenTaskMonitor = { 0 };
+
+static void __led_task(void* data) {
+	static bool ledState = false;
+	digitalWrite(LED_BUILTIN, ledState ? HIGH : LOW);
+	ledState = !ledState;
 	cms_task_delay(500);
 }
 
-static void notify_task(void* data) {
-	cms_monitor_t* mListenTaskMonitor = (cms_monitor_t*)data;
+static void __notify_task(void* data) {
+	static int counter = 0;
+	if (counter != 0 && counter % 10 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT1, true);
 
-	static int mState = 0;
-	if (mState != 0 && mState % 10 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT1, true);
+	if (counter != 0 && counter % 12 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT2, true);
 
-	if (mState != 0 && mState % 12 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT2, true);
+	if (counter != 0 && counter % 15 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT1 | EVT2, true);
 
-	if (mState != 0 && mState % 15 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT1 | EVT2, true);
+	if (counter != 0 && counter == 40)
+		cms_monitor_notify(&__listenTaskMonitor, EVT_STOP, true);
 
 	Serial.print("[NOTIFY] Counter: ");
-	Serial.print(mState);
+	Serial.print(counter);
 	Serial.print("\r\n");
-	mState++;
+	counter++;
 	cms_task_delay(1000);
 }
 
-static void listen_task(void* data) {
-	cms_monitor_t* mListenTaskMonitor = cms_task_get_monitor();
+static void __listen_task(void* data) {
+	if (cms_monitor_check_events(&__listenTaskMonitor, EVT1, false, false))
+		Serial.print("[LISTEN] Detected EVT1\r\n");
 
-	if (cms_monitor_check_events(mListenTaskMonitor, EVT1, false, false))
-		Serial.print("[LISTEN] Notified EVT1\r\n");
+	if (cms_monitor_check_events(&__listenTaskMonitor, EVT2, false, false))
+		Serial.print("[LISTEN] Detected EVT2\r\n");
 
-	if (cms_monitor_check_events(mListenTaskMonitor, EVT2, false, false))
-		Serial.print("[LISTEN] Notified EVT2\r\n");
+	bool stop = cms_monitor_check_events(&__listenTaskMonitor, EVT_STOP, false, false);
 
-	cms_monitor_clear_events(mListenTaskMonitor, CMS_MONITOR_ALL_EVENTS);
-	cms_monitor_wait(mListenTaskMonitor, EVT1 | EVT2, UINT64_MAX, false);
+	if (stop) {
+		Serial.print("[LISTEN] Detected EVT_STOP (watchdog will reset the board)\r\n");
+		while(true) {
+			// Never returns to the scheduler (which allows watchdog to be reset).
+		}
+	} else {
+		cms_monitor_clear_events(&__listenTaskMonitor, CMS_MONITOR_ALL_EVENTS);
+		cms_monitor_wait(&__listenTaskMonitor, EVT1 | EVT2 | EVT_STOP, UINT64_MAX, false);
+	}
+}
+
+static void __watchdog_reset_task(void* data) {
+	_watchdog_reset();
+	cms_task_delay(500);
 }
 
 void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	Serial.begin(9600);
 
-	cms_monitor_t* mListenTaskMonitor = cms_scheduler_create_task(listen_task, nullptr, nullptr);
-	cms_scheduler_create_task(led_task, nullptr, nullptr);
-	cms_scheduler_create_task(notify_task, mListenTaskMonitor, nullptr);
+	cms_scheduler_create_task(__listen_task, nullptr, nullptr);
+	cms_scheduler_create_task(__led_task, nullptr, nullptr);
+	cms_scheduler_create_task(__notify_task, nullptr, nullptr);
+	cms_scheduler_create_task(__watchdog_reset_task, nullptr, nullptr);
+
+	_watchdog_init();
+
+	Serial.print("Firmware is ready!\r\n");
 }
 
 void loop() {

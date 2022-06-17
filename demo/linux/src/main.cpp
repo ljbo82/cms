@@ -24,53 +24,63 @@ SOFTWARE.
 
 #include <iostream>
 
-#define EVT1 (1 << 0)
-#define EVT2 (1 << 1)
+#define EVT1     (1 << 0)
+#define EVT2     (1 << 1)
+#define EVT_STOP (1 << 2)
 
-static void led_task(void* data) {
-	static bool mLedState = false;
-	std::cout << "[LED] " << (mLedState ? "ON" : "OFF") << std::endl;
-	mLedState = !mLedState;
+static cms_monitor_t __listenTaskMonitor = { 0 };
+
+static void __destructor(void* data) {
+	std::cout << "destructor" << std::endl;
+}
+
+static void __led_task(void* data) {
+	static bool ledState = false;
+	std::cout << "[LED] " << (ledState ? "ON" : "OFF") << std::endl;
+	ledState = !ledState;
 	cms_task_delay(1000);
 }
 
-static void notify_task(void* data) {
-	cms_monitor_t* mListenTaskMonitor = (cms_monitor_t*)data;
+static void __notify_task(void* data) {
+	static int counter = 0;
 
-	static int mNotifyState = 0;
+	if (counter != 0 && counter % 10 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT1, true);
 
-	if (mNotifyState != 0 && mNotifyState % 10 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT1, true);
+	if (counter != 0 && counter % 12 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT2, true);
 
-	if (mNotifyState != 0 && mNotifyState % 12 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT2, true);
+	if (counter != 0 && counter % 15 == 0)
+		cms_monitor_notify(&__listenTaskMonitor, EVT1 | EVT2, true);
 
-	if (mNotifyState != 0 && mNotifyState % 15 == 0)
-		cms_monitor_notify(mListenTaskMonitor, EVT1 | EVT2, true);
+	if (counter != 0 && counter == 40)
+		cms_monitor_notify(&__listenTaskMonitor, EVT_STOP, true);
 
-	std::cout << "[NOTIFY] counter: " << mNotifyState << std::endl;
-	mNotifyState++;
+	std::cout << "[NOTIFY] counter: " << counter << std::endl;
+	counter++;
 	cms_task_delay(1000);
 }
 
-static void listen_task(void* data) {
-	cms_monitor_t* mListenTaskMonitor = cms_task_get_monitor();
+static void __listen_task(void* data) {
+	if (cms_monitor_check_events(&__listenTaskMonitor, EVT1, false, false))
+		std::cout << "[LISTEN] Detected EVT1" << std::endl;
 
-	if (cms_monitor_check_events(mListenTaskMonitor, EVT1, false, false))
-		std::cout << "[LISTEN] Notified EVT1" << std::endl;
+	if (cms_monitor_check_events(&__listenTaskMonitor, EVT2, false, false))
+		std::cout << "[LISTEN] Detected EVT2" << std::endl;
 
-	if (cms_monitor_check_events(mListenTaskMonitor, EVT2, false, false))
-		std::cout << "[LISTEN] Notified EVT2" << std::endl;
+	if (cms_monitor_check_events(&__listenTaskMonitor, EVT_STOP, false, false)) {
+		std::cout << "[LISTEN] Detected EVT_STOP" << std::endl;
+		cms_scheduler_stop(false);
+	}
 
-	cms_monitor_clear_events(mListenTaskMonitor, CMS_MONITOR_ALL_EVENTS);
+	cms_monitor_clear_events(&__listenTaskMonitor, CMS_MONITOR_ALL_EVENTS);
 
-	cms_monitor_wait(mListenTaskMonitor, EVT1 | EVT2, UINT64_MAX, false);
+	cms_monitor_wait(&__listenTaskMonitor, EVT1 | EVT2 | EVT_STOP, UINT64_MAX, false);
 }
 
 int main() {
-	cms_monitor_t* mListenTaskMonitor = cms_scheduler_create_task(listen_task, nullptr, nullptr);
-	cms_scheduler_create_task(led_task, nullptr, nullptr);
-	cms_scheduler_create_task(notify_task, mListenTaskMonitor, nullptr);
+	cms_scheduler_create_task(__listen_task, nullptr, __destructor);
+	cms_scheduler_create_task(__led_task, nullptr, __destructor);
+	cms_scheduler_create_task(__notify_task, nullptr, __destructor);
 	cms_scheduler_start();
-	abort();
 }

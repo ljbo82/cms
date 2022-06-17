@@ -26,23 +26,30 @@ SOFTWARE.
 
 #include <stdlib.h>
 
-static bool __is_task_ready(_cms_scheduler_task_t* task) {
-	bool mWakeUp;
+static _cms_scheduler_t __scheduler = {
+	.first          = NULL,
+	.last           = NULL,
+	.activeTaskNode = NULL,
+	.running        = false
+};
+
+static bool __is_task_ready(cms_task_t* task) {
+	bool ready;
 
 	if (!task->waiting) {
-		mWakeUp = true;
+		ready = true;
 	} else {
-		uint64_t mNow = cms_system_timestamp();
+		uint64_t now = cms_system_timestamp();
 
 		// Check for delay/wait timeout:
-		mWakeUp = (mNow - task->waitTimestamp) >= task->waitTimeout;
+		ready = (now - task->waitTimestamp) >= task->waitTimeout;
 
 		// Check for notifications:
-		if (!mWakeUp && task->monitor != NULL && task->waitEvents != 0)
-			mWakeUp = cms_monitor_check_events(task->monitor, task->waitEvents, task->allEvents, false);
+		if (!ready && task->monitor != NULL && task->waitEvents != 0)
+			ready = cms_monitor_check_events(task->monitor, task->waitEvents, task->allEvents, false);
 	}
 
-	if (mWakeUp) {
+	if (ready) {
 		task->waiting = false;
 		task->monitor = NULL;
 		task->waitTimestamp = 0;
@@ -51,19 +58,19 @@ static bool __is_task_ready(_cms_scheduler_task_t* task) {
 		task->allEvents = false;
 	}
 
-	return mWakeUp;
+	return ready;
 }
 
 static void __do_cleanup() {
-	_cms_scheduler_task_node_t* mNode = _scheduler->first;
-	while (mNode != NULL) {
-		if (mNode->task->destructor)
-			mNode->task->destructor(mNode->task->data);
+	_cms_scheduler_task_node_t* taskNode = _scheduler->first;
+	while (taskNode != NULL) {
+		if (taskNode->task->destructor)
+			taskNode->task->destructor(taskNode->task->data);
 
-		free(mNode->task);
-		_cms_scheduler_task_node_t* mNextNode = mNode->next;
-		free(mNode);
-		mNode = mNextNode;
+		free(taskNode->task);
+		_cms_scheduler_task_node_t* nextNode = taskNode->next;
+		free(taskNode);
+		taskNode = nextNode;
 	}
 
 	_scheduler->first          = NULL;
@@ -71,37 +78,47 @@ static void __do_cleanup() {
 	_scheduler->activeTaskNode = NULL;
 }
 
-DLL_PUBLIC cms_monitor_t* cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
-	_cms_scheduler_task_t* mTask = malloc(sizeof(_cms_scheduler_task_t));
+DLL_LOCAL _cms_scheduler_t* _scheduler = &__scheduler;
+
+DLL_PUBLIC cms_task_t* cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
 	if (taskFn == NULL)
 		return NULL;
 
-	mTask->internalMonitor.events = 0;
-	mTask->waiting = false;
-	mTask->monitor = NULL;
-	mTask->waitTimestamp = 0;
-	mTask->waitTimeout = 0;
-	mTask->waitEvents = 0;
-	mTask->allEvents = false;
-	mTask->taskFn = taskFn;
-	mTask->data = taskData;
-	mTask->destructor = destructor;
+	cms_task_t* task = malloc(sizeof(cms_task_t));
 
-	_cms_scheduler_task_node_t* mNode = malloc(sizeof(_cms_scheduler_task_node_t));
-	mNode->next = NULL;
-	mNode->task = mTask;
+	if (task == NULL)
+		return NULL;
+
+	task->waiting = false;
+	task->monitor = NULL;
+	task->waitTimestamp = 0;
+	task->waitTimeout = 0;
+	task->waitEvents = 0;
+	task->allEvents = false;
+	task->taskFn = taskFn;
+	task->data = taskData;
+	task->destructor = destructor;
+
+	_cms_scheduler_task_node_t* taskNode = malloc(sizeof(_cms_scheduler_task_node_t));
+	if (taskNode == NULL) {
+		free(task);
+		return NULL;
+	}
+
+	taskNode->next = NULL;
+	taskNode->task = task;
 
 	if (_scheduler->last == NULL) {
 		// Adding first node
-		_scheduler->first = mNode;
+		_scheduler->first = taskNode;
 	} else {
 		// Appending a new node
-		_scheduler->last->next = mNode;
+		_scheduler->last->next = taskNode;
 	}
 
-	_scheduler->last = mNode;
+	_scheduler->last = taskNode;
 
-	return &mTask->internalMonitor;
+	return task;
 }
 
 DLL_PUBLIC bool cms_scheduler_start() {
@@ -110,11 +127,11 @@ DLL_PUBLIC bool cms_scheduler_start() {
 
 	_scheduler->running = true;
 
-	_cms_scheduler_task_node_t* mActiveTaskNode = _scheduler->first;
+	_cms_scheduler_task_node_t* activeTaskNode = _scheduler->first;
 
 	while(_scheduler->running) {
-		_scheduler->activeTaskNode = mActiveTaskNode;
-		_cms_scheduler_task_t* mActiveTask = _scheduler->activeTaskNode->task;
+		_scheduler->activeTaskNode = activeTaskNode;
+		cms_task_t* mActiveTask = _scheduler->activeTaskNode->task;
 
 		if (__is_task_ready(mActiveTask)) {
 			if (setjmp(_scheduler->jmpBuf) == 0) {
@@ -122,11 +139,11 @@ DLL_PUBLIC bool cms_scheduler_start() {
 			}
 		}
 
-		mActiveTaskNode = mActiveTaskNode->next;
+		activeTaskNode = activeTaskNode->next;
 
-		if (mActiveTaskNode == NULL) {
+		if (activeTaskNode == NULL && _scheduler->running) {
 			// End of scheduler cycle, adjust state for next cycle...
-			mActiveTaskNode = _scheduler->first;
+			activeTaskNode = _scheduler->first;
 
 			// Allows system to process extern events...
 			cmd_system_process_events();
@@ -138,6 +155,16 @@ DLL_PUBLIC bool cms_scheduler_start() {
 	return true;
 }
 
-DLL_PUBLIC void cms_scheduler_stop() {
+DLL_PUBLIC cms_task_t* cms_scheduler_get_active_task() {
+	return _scheduler->activeTaskNode == NULL ? NULL : _scheduler->activeTaskNode->task;
+}
+
+DLL_PUBLIC void cms_scheduler_stop(bool now) {
+	if (!_scheduler->running)
+		return;
+
 	_scheduler->running = false;
+
+	if (now)
+		longjmp(_scheduler->jmpBuf, 1);
 }

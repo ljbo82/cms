@@ -20,14 +20,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <cms/system.h>
+#include <watchdog_private.h>
 
-#include <Arduino.h>
+#include <avr/wdt.h>
 
-DLL_PUBLIC uint64_t cms_system_timestamp() {
-	return millis();
+void _watchdog_init() {
+	wdt_enable(WDTO_1S);
 }
 
-DLL_PUBLIC void cmd_system_process_events() {
-	// Does nothing
+void _watchdog_reset() {
+	wdt_reset();
 }

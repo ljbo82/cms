@@ -1,16 +1,31 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "linux",
             "includePath": [
-				"${workspaceFolder}/src",
+                "${workspaceFolder}/src",
                 "${workspaceFolder}/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu99",
             "cppStandard": "gnu++11",
-            "intelliSenseMode": "linux-gcc-x64",
+            "intelliSenseMode": "${default}",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        },
+        {
+            "name": "arduino-avr",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/demo/arduino/src"
+
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/avr-gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++11",
+            "intelliSenseMode": "${default}",
             "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
