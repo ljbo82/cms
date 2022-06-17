@@ -22,7 +22,7 @@ PROJ_NAME = blink
 PROJ_TYPE = app
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS      += -L$(O_DIST_DIR)/lib -lcms0
+override LDFLAGS += -L$(O_DIST_DIR)/lib -lcms0
 
 PRE_BUILD_DEPS += cms
 

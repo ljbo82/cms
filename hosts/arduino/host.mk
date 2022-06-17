@@ -23,7 +23,7 @@ ifeq ($(ARDUINO_CORE_DIR),)
 endif
 
 INCLUDE_DIRS += $(O_DIST_DIR)/include
-LDFLAGS      += -L$(O_DIST_DIR)/lib -larduino-core1
+override LDFLAGS += -L$(O_DIST_DIR)/lib -larduino-core1
 
 PRE_BUILD_DEPS += arduino-core
 
