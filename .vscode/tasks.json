@@ -2,18 +2,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build-demo",
+            "label": "build-demo-pc",
             "detail": "Builds demo application",
             "type": "shell",
-            "options": { "cwd": "demo/linux" },
+            "options": { "cwd": "demo/pc" },
             "command": "make DEBUG=1 V=1",
             "group": "build",
         },
         {
-            "label": "clean-demo",
+            "label": "clean-demo-pc",
             "detail": "Clean for demo application",
             "type": "shell",
-            "options": { "cwd": "demo/linux" },
+            "options": { "cwd": "demo/pc" },
             "command": "make clean V=1",
             "group": "build"
         }

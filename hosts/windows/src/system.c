@@ -20,12 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <cms/task.h>
+#include <cms/system.h>
 
-DLL_PUBLIC void cms_task_delay(uint64_t millis) {
-	cms_monitor_wait(NULL, 0, millis, false);
+#include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+
+uint64_t cms_system_timestamp() {
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	return (now.tv_sec * 1000000 + now.tv_usec) / 1000;
 }
 
-DLL_PUBLIC void cms_task_yield() {
-	cms_task_delay(0);
+DLL_PUBLIC void cmd_system_process_events() {
+	 usleep(5*1000);   /*Sleep for 5 millisecond*/
 }
