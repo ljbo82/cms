@@ -40,13 +40,17 @@ SOFTWARE.
 			#define DLL_PUBLIC __declspec(dllexport)
 		#endif
 	#else
-		#ifdef __GNUC__
-			#define DLL_PUBLIC __attribute__ ((dllimport))
+		#ifdef USING_DLL
+			#ifdef __GNUC__
+				#define DLL_PUBLIC __attribute__ ((dllimport))
+			#else
+				#define DLL_PUBLIC __declspec(dllimport)
+			#endif
 		#else
-			#define DLL_PUBLIC __declspec(dllimport)
+			#define DLL_PUBLIC
+			#define DLL_LOCAL
 		#endif
 	#endif
-	#define DLL_LOCAL
 #else
 	#if __GNUC__ >= 4
 		#define DLL_PUBLIC __attribute__ ((visibility ("default")))
