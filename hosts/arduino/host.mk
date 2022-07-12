@@ -22,14 +22,4 @@ ifeq ($(ARDUINO_CORE_DIR),)
     $(error [ARDUINO_CORE_DIR] Mising value)
 endif
 
-INCLUDE_DIRS += $(O_DIST_DIR)/include
-override LDFLAGS += -L$(O_DIST_DIR)/lib -larduino-core1
-
-PRE_BUILD_DEPS += arduino-core
-
-# ==============================================================================
-.PHONY: arduino-core
-arduino-core:
-    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(ARDUINO_CORE_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(ARDUINO_CORE_DIR) $(O))
-# ==============================================================================
+LIB_PROJECTS += $(ARDUINO_CORE_DIR):arduino-core1

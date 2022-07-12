@@ -19,15 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 /**
  * @file
  * @brief Global header.
  */
 #pragma once
 
-#include <cms/system.h>
-#include <cms/scheduler.h>
-#include <cms/task.h>
+#include "cms/system.h"
+#include "cms/scheduler.h"
+#include "cms/task.h"
 
 #ifdef __cplusplus
 extern "C" {

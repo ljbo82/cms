@@ -21,20 +21,15 @@
 PROJ_NAME = blink
 PROJ_TYPE = app
 
-INCLUDE_DIRS += $(O_DIST_DIR)/include
-override LDFLAGS += -L$(O_DIST_DIR)/lib -lcms0 -larduino-core1
+LIB_PROJECTS += ../..:cms0
 
-PRE_BUILD_DEPS += cms
+# NOTE: When cms is built for arduino, arduino core will be built too
+LDFLAGS += -larduino-core1
 
-# Library source directory
-CMS_DIR ?= ../..
+export HOST ?= arduino-avr-uno
 
-# ==============================================================================
-.PHONY: cms
-cms:
-    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(CMS_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(CMS_DIR) $(O))
-# ==============================================================================
+ARDUINO_BUILDER     ?= ../../builder/arduino-builder
+CPP_PROJECT_BUILDER ?= ../../builder/cpp-project-builder
 
-include ../../make/builder.mk
-
+include $(ARDUINO_BUILDER)/layers.mk
+include $(CPP_PROJECT_BUILDER)/builder.mk

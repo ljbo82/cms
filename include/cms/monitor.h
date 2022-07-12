@@ -26,7 +26,7 @@ SOFTWARE.
  */
 #pragma once
 
-#include <cms/defs.h>
+#include "defs.h"
 
 #define CMS_MONITOR_ALL_EVENTS UINT8_MAX
 
@@ -67,7 +67,7 @@ extern "C" {
  * @param allEvents Defines if either all events at once, or any of given
  *        events is a valid condition (will be ignored if 'monitor' is NULL).
  */
-DLL_PUBLIC void cms_monitor_wait(
+PUBLIC void CALL cms_monitor_wait(
 	cms_monitor_t* monitor,
 	cms_events_t events,
 	uint64_t millis,
@@ -86,7 +86,7 @@ DLL_PUBLIC void cms_monitor_wait(
  *        Passing {@code false} will force the monitor to have exactly
  *        given events.
  */
-DLL_PUBLIC void cms_monitor_notify(
+PUBLIC void CALL cms_monitor_notify(
 	cms_monitor_t* monitor,
 	cms_events_t events,
 	bool append
@@ -100,7 +100,7 @@ DLL_PUBLIC void cms_monitor_notify(
  * @param events Events in monitor that must be cleared. In order to clear
  *        all events use {@link CMS_MONITOR_ALL_EVENTS}.
  */
-DLL_PUBLIC void cms_monitor_clear_events(
+PUBLIC void CALL cms_monitor_clear_events(
 	cms_monitor_t* monitor,
 	cms_events_t events
 );
@@ -123,7 +123,7 @@ DLL_PUBLIC void cms_monitor_clear_events(
  *         ({@code allEvents == false}or 2) all events matched at once
  *         ({@code allEvents = true}) in given monitor.
  */
-DLL_PUBLIC bool cms_monitor_check_events(
+PUBLIC bool CALL cms_monitor_check_events(
 	cms_monitor_t* monitor,
 	cms_events_t events,
 	bool allEvents,

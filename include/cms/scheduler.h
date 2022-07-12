@@ -26,7 +26,7 @@ SOFTWARE.
  */
 #pragma once
 
-#include <cms/monitor.h>
+#include "monitor.h"
 
 /**
  * @brief Represents a task function.
@@ -39,14 +39,14 @@ SOFTWARE.
  *
  * @param data Data defined during task creation.
  */
-typedef void (*cms_task_fn)(void* data);
+typedef void (CALL *cms_task_fn)(void* data);
 
 /**
  * @brief Represents a destructor function.
  *
  * @param data Data to be destroyed.
  */
-typedef void (*cms_destructor_fn)(void* data);
+typedef void (CALL *cms_destructor_fn)(void* data);
 
 /** @brief Task handler. */
 typedef struct _cms_scheduler_task cms_task_t;
@@ -73,7 +73,7 @@ extern "C" {
  *
  * @return Created task handler or {@code NULL} on failure.
  */
-DLL_PUBLIC cms_task_t* cms_scheduler_create_task(
+PUBLIC cms_task_t* CALL cms_scheduler_create_task(
 	cms_task_fn taskFn,
 	void* taskData,
 	cms_destructor_fn destructor
@@ -94,7 +94,7 @@ DLL_PUBLIC cms_task_t* cms_scheduler_create_task(
  *         associated tasks, this function will do nothing and will
  *         {@code false}.
  */
-DLL_PUBLIC bool cms_scheduler_start();
+PUBLIC bool CALL cms_scheduler_start();
 
 /**
  * @brief Returns the active task.
@@ -102,14 +102,14 @@ DLL_PUBLIC bool cms_scheduler_start();
  * @return Active task handler. If scheduler is not running, returns
  *         {@code NULL}.
  */
-DLL_PUBLIC cms_task_t* cms_scheduler_get_active_task();
+PUBLIC cms_task_t* CALL cms_scheduler_get_active_task();
 
 /**
  * @brief Stops scheduler.
  *
  * @param now Defines if scheduler shall stop immediately.
  */
-DLL_PUBLIC void cms_scheduler_stop(bool now);
+PUBLIC void CALL cms_scheduler_stop(bool now);
 
 #ifdef __cplusplus
 } // extern "C"

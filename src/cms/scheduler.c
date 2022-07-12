@@ -78,9 +78,9 @@ static void __do_cleanup() {
 	_scheduler->activeTaskNode = NULL;
 }
 
-DLL_LOCAL _cms_scheduler_t* _scheduler = &__scheduler;
+PRIVATE _cms_scheduler_t* _scheduler = &__scheduler;
 
-DLL_PUBLIC cms_task_t* cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
+PUBLIC cms_task_t* CALL cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
 	if (taskFn == NULL)
 		return NULL;
 
@@ -121,7 +121,7 @@ DLL_PUBLIC cms_task_t* cms_scheduler_create_task (cms_task_fn taskFn, void* task
 	return task;
 }
 
-DLL_PUBLIC bool cms_scheduler_start() {
+PUBLIC bool CALL cms_scheduler_start() {
 	if (_scheduler->running || _scheduler->first == NULL)
 		return false;
 
@@ -155,11 +155,11 @@ DLL_PUBLIC bool cms_scheduler_start() {
 	return true;
 }
 
-DLL_PUBLIC cms_task_t* cms_scheduler_get_active_task() {
+PUBLIC cms_task_t* CALL cms_scheduler_get_active_task() {
 	return _scheduler->activeTaskNode == NULL ? NULL : _scheduler->activeTaskNode->task;
 }
 
-DLL_PUBLIC void cms_scheduler_stop(bool now) {
+PUBLIC void CALL cms_scheduler_stop(bool now) {
 	if (!_scheduler->running)
 		return;
 

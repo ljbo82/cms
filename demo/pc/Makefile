@@ -23,4 +23,19 @@ PROJ_TYPE = app
 
 LIB_PROJECTS += ../..:cms0
 
-include ../../make/cpp-project-builder/builder.mk
+CPP_PROJECT_BUILDER ?= ../../builder/cpp-project-builder
+
+# Since LIB_TYPE will be defined after platform layers are processed,
+# includes project.mk instead of builder.mk in order to fully parse project
+# data prior to compiler management.
+include $(CPP_PROJECT_BUILDER)/project.mk
+
+# At this point, LIB_TYPE is defined, but compiler management did not took
+# place yet.
+
+# Source code use special decorators when using a shared library
+ifeq ($(LIB_TYPE),shared)
+    CFLAGS += -DUSE_SHARED_LIB
+endif
+
+include $(CPP_PROJECT_BUILDER)/builder.mk

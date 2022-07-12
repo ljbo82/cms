@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <stdlib.h>
 
-DLL_PUBLIC void cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
+PUBLIC void CALL cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
 	cms_task_t* activeTask = cms_scheduler_get_active_task();
 
 	if (activeTask == NULL)
@@ -43,7 +43,7 @@ DLL_PUBLIC void cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, ui
 	longjmp(_scheduler->jmpBuf, 1);
 }
 
-DLL_PUBLIC void cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, bool append) {
+PUBLIC void CALL cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, bool append) {
 	if (append) {
 		monitor->events |= events;
 	} else {
@@ -51,11 +51,11 @@ DLL_PUBLIC void cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, 
 	}
 }
 
-DLL_PUBLIC void cms_monitor_clear_events(cms_monitor_t* monitor, cms_events_t events) {
+PUBLIC void CALL cms_monitor_clear_events(cms_monitor_t* monitor, cms_events_t events) {
 	monitor->events &= ~events;
 }
 
-DLL_PUBLIC bool cms_monitor_check_events(cms_monitor_t* monitor, cms_events_t events, bool allEvents, bool clear) {
+PUBLIC bool CALL cms_monitor_check_events(cms_monitor_t* monitor, cms_events_t events, bool allEvents, bool clear) {
 	cms_events_t matchedEvents = (monitor->events & events);
 
 	if (matchedEvents != 0) {

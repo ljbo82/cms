@@ -10,7 +10,7 @@
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu99",
             "cppStandard": "gnu++11",
-            "intelliSenseMode": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
             "configurationProvider": "ms-vscode.makefile-tools"
         },
         {
@@ -19,7 +19,6 @@
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/demo/arduino/src"
-
             ],
             "defines": [],
             "compilerPath": "/usr/bin/avr-gcc",

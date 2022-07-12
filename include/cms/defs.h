@@ -33,32 +33,31 @@ SOFTWARE.
 #include <stdint.h>
 
 #if defined _WIN32 || defined __CYGWIN__
-	#ifdef BUILDING_DLL
-		#ifdef __GNUC__
-			#define DLL_PUBLIC __attribute__ ((dllexport))
+	#if defined (BUILD_SHARED_LIB) || defined (USE_SHARED_LIB)
+		#ifdef BUILD_SHARED_LIB
+			/** @internal */
+			#define PUBLIC __declspec(dllexport)
 		#else
-			#define DLL_PUBLIC __declspec(dllexport)
+			/** @internal */
+			#define PUBLIC __declspec(dllimport)
 		#endif
 	#else
-		#ifdef USING_DLL
-			#ifdef __GNUC__
-				#define DLL_PUBLIC __attribute__ ((dllimport))
-			#else
-				#define DLL_PUBLIC __declspec(dllimport)
-			#endif
-		#else
-			#define DLL_PUBLIC
-			#define DLL_LOCAL
-		#endif
+		#define PUBLIC
 	#endif
+
+	/** @internal */
+	#define CALL __cdecl
 #else
 	#if __GNUC__ >= 4
-		#define DLL_PUBLIC __attribute__ ((visibility ("default")))
-		#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+		/** @internal */
+		#define PUBLIC __attribute__ ((visibility ("default")))
 	#else
-		#define DLL_PUBLIC
-		#define DLL_LOCAL
+		/** @internal */
+		#define PUBLIC
 	#endif
+
+	/** @internal */
+	#define CALL
 #endif
 
 #ifdef __cplusplus

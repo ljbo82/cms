@@ -26,6 +26,8 @@ SOFTWARE.
  */
 #pragma once
 
+#include "defs_private.h"
+
 #include <cms/scheduler.h>
 
 #include <setjmp.h>
@@ -97,7 +99,7 @@ struct _cms_scheduler {
 };
 
 /** @brief Active scheduler. */
-extern DLL_LOCAL _cms_scheduler_t* _scheduler;
+extern PRIVATE _cms_scheduler_t* _scheduler;
 
 #ifdef __cplusplus
 extern "C" {

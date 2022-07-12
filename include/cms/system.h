@@ -26,7 +26,7 @@ SOFTWARE.
  */
 #pragma once
 
-#include <cms/defs.h>
+#include "defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,7 +39,7 @@ extern "C" {
  *       be larger than a millisecond.
  *
  * @return System timestamp in milliseconds. */
-DLL_PUBLIC uint64_t cms_system_timestamp();
+PUBLIC uint64_t CALL cms_system_timestamp();
 
 /**
  * @brief Process system events.
@@ -47,7 +47,7 @@ DLL_PUBLIC uint64_t cms_system_timestamp();
  * This function will be called periodically by the scheduler in order to
  * allow external events to be processed.
  */
-DLL_PUBLIC void cmd_system_process_events();
+PUBLIC void CALL cmd_system_process_events();
 
 #ifdef __cplusplus
 } // extern "C"

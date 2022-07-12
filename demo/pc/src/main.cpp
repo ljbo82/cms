@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <cms/cms.h>
+#include <cms.h>
 
 #include <iostream>
 
@@ -30,18 +30,18 @@ SOFTWARE.
 
 static cms_monitor_t __listenTaskMonitor = { 0 };
 
-static void __destructor(void* data) {
+static void CALL __destructor(void* data) {
 	std::cout << "destructor" << std::endl;
 }
 
-static void __led_task(void* data) {
+static void CALL __led_task(void* data) {
 	static bool ledState = false;
 	std::cout << "[LED] " << (ledState ? "ON" : "OFF") << std::endl;
 	ledState = !ledState;
 	cms_task_delay(1000);
 }
 
-static void __notify_task(void* data) {
+static void CALL __notify_task(void* data) {
 	static int counter = 0;
 
 	if (counter != 0 && counter % 10 == 0)
@@ -61,7 +61,7 @@ static void __notify_task(void* data) {
 	cms_task_delay(1000);
 }
 
-static void __listen_task(void* data) {
+static void CALL __listen_task(void* data) {
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT1, false, false))
 		std::cout << "[LISTEN] Detected EVT1" << std::endl;
 

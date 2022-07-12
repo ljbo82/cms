@@ -26,7 +26,7 @@ SOFTWARE.
  */
 #pragma once
 
-#include <cms/monitor.h>
+#include "monitor.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,12 +40,12 @@ extern "C" {
  * @param millis Delay interval in milliseconds. Passing zero is equivalent
  *        to {@link cms_task_yield()}.
  */
-DLL_PUBLIC void cms_task_delay(
+PUBLIC void CALL cms_task_delay(
 	uint64_t millis
 );
 
 /** @brief Causes the execution to return to the scheduler. */
-DLL_PUBLIC void cms_task_yield();
+PUBLIC void CALL cms_task_yield();
 
 #ifdef __cplusplus
 } // extern "C"

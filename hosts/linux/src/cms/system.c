@@ -28,12 +28,12 @@ SOFTWARE.
 #include <errno.h>
 #include <unistd.h>
 
-DLL_PUBLIC uint64_t cms_system_timestamp() {
+PUBLIC uint64_t CALL cms_system_timestamp() {
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	return (now.tv_sec * 1000000 + now.tv_usec) / 1000;
 }
 
-DLL_PUBLIC void cmd_system_process_events() {
+PUBLIC void CALL cmd_system_process_events() {
 	 usleep(5*1000);   /*Sleep for 5 millisecond*/
 }

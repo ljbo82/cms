@@ -20,20 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <cms/system.h>
+#pragma once
 
-#include <sys/time.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <unistd.h>
+#include <cms/defs.h>
 
-PUBLIC uint64_t CALL cms_system_timestamp() {
-	struct timeval now;
-	gettimeofday(&now, NULL);
-	return (now.tv_sec * 1000000 + now.tv_usec) / 1000;
-}
+#if defined _WIN32 || defined __CYGWIN__
+	/** @internal */
+	#define PRIVATE
+#else
+	#if __GNUC__ >= 4
+		/** @internal */
+		#define PRIVATE  __attribute__ ((visibility ("hidden")))
+	#else
+		/** @internal */
+		#define PRIVATE
+	#endif
+#endif
 
-PUBLIC void CALL cmd_system_process_events() {
-	 usleep(5*1000);   /*Sleep for 5 millisecond*/
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
