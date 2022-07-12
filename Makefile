@@ -22,4 +22,5 @@ PROJ_NAME  := cms
 PROJ_TYPE  := lib
 LIB_TYPE   ?= static
 
-include make/builder.mk
+include make/arduino-builder/layers.mk
+include make/cpp-project-builder/builder.mk

@@ -21,20 +21,6 @@
 PROJ_NAME = blink
 PROJ_TYPE = app
 
-INCLUDE_DIRS += $(O_DIST_DIR)/include
-override LDFLAGS += -L$(O_DIST_DIR)/lib -lcms0
+LIB_PROJECTS += ../..:cms0
 
-PRE_BUILD_DEPS += cms
-
-# Library source directory
-CMS_DIR ?= ../..
-
-# ==============================================================================
-.PHONY: cms
-cms:
-    # NOTE: Uses a custom BUILD_DIR in order to isolate library object files from application ones.
-	$(O_VERBOSE)$(MAKE) -C $(CMS_DIR) BUILD_DIR=build/lib O=$(shell realpath -m --relative-to=$(CMS_DIR) $(O))
-# ==============================================================================
-
-include ../../make/builder.mk
-
+include ../../make/cpp-project-builder/builder.mk

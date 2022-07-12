@@ -1,3 +1,6 @@
-[submodule "make"]
-	path = make
-	url = https://github.com/ljbo82/arduino-builder
+[submodule "make/cpp-project-builder"]
+	path = make/cpp-project-builder
+	url = https://github.com/ljbo82/cpp-project-builder.git
+[submodule "make/arduino-builder"]
+	path = make/arduino-builder
+	url = https://github.com/ljbo82/arduino-builder.git

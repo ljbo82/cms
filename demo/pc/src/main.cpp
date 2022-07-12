@@ -53,7 +53,7 @@ static void __notify_task(void* data) {
 	if (counter != 0 && counter % 15 == 0)
 		cms_monitor_notify(&__listenTaskMonitor, EVT1 | EVT2, true);
 
-	if (counter != 0 && counter == 40)
+	if (counter == 40)
 		cms_monitor_notify(&__listenTaskMonitor, EVT_STOP, true);
 
 	std::cout << "[NOTIFY] counter: " << counter << std::endl;
