@@ -14,13 +14,19 @@
             "configurationProvider": "ms-vscode.makefile-tools"
         },
         {
-            "name": "arduino-avr",
+            "name": "arduino-avr-uno",
             "includePath": [
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/demo/arduino/src"
+                "${workspaceFolder}/demo/arduino/src",
+                "${workspaceFolder}/demo/arduino/output/arduino-avr-uno/release/dist/include"
             ],
-            "defines": [],
+            "compilerArgs": ["-mmcu=atmega328p"],
+            "defines": [
+                "F_CPU=16000000L",
+                "ARDUINO_UNO",
+                "ARDUINO_ARCH_AVR"
+			],
             "compilerPath": "/usr/bin/avr-gcc",
             "cStandard": "gnu11",
             "cppStandard": "gnu++11",
