@@ -78,7 +78,7 @@ static void __do_cleanup() {
 	_scheduler->activeTaskNode = NULL;
 }
 
-PRIVATE _cms_scheduler_t* _scheduler = &__scheduler;
+_cms_scheduler_t* _scheduler = &__scheduler;
 
 PUBLIC cms_task_t* CALL cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
 	if (taskFn == NULL)
