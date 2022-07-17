@@ -36,7 +36,7 @@ static void __led_task(void* data) {
 	static bool ledState = false;
 	digitalWrite(LED_BUILTIN, ledState ? HIGH : LOW);
 	ledState = !ledState;
-	cms_task_delay(500);
+	cms_task_delay(250);
 }
 
 static void __notify_task(void* data) {
@@ -72,7 +72,7 @@ static void __listen_task(void* data) {
 	if (stop) {
 		Serial.print("[LISTEN] Detected EVT_STOP (watchdog will reset the board)\r\n");
 		while(true) {
-			// Never returns to the scheduler (which allows watchdog to be reset).
+			// Never returns to the scheduler (watchdog will timeout).
 		}
 	} else {
 		cms_monitor_clear_events(&__listenTaskMonitor, CMS_MONITOR_ALL_EVENTS);
