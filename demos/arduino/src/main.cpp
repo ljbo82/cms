@@ -100,7 +100,7 @@ void setup() {
 
 	_watchdog_init();
 
-	Serial.print("Firmware is ready!\n");
+	Serial.print("==== Firmware is ready! ====\n");
 }
 
 void loop() {
