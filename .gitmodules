@@ -1,6 +1,6 @@
-[submodule "builder/cpp-project-builder"]
-	path = builder/cpp-project-builder
-	url = ../cpp-project-builder.git
-[submodule "builder/arduino-builder"]
-	path = builder/arduino-builder
-	url = ../arduino-builder.git
+[submodule "make/arduino-builder"]
+	path = make/arduino-builder
+	url = https://github.com/ljbo82/arduino-builder.git
+[submodule "make/cpp-project-builder-core"]
+	path = make/cpp-project-builder-core
+	url = https://github.com/ljbo82/cpp-project-builder-core.git

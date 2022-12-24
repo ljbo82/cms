@@ -22,10 +22,10 @@ SOFTWARE.
 
 #include <cms/task.h>
 
-PUBLIC void CALL cms_task_delay(uint64_t millis) {
+void cms_task_delay(uint64_t millis) {
 	cms_monitor_wait(NULL, 0, millis, false);
 }
 
-PUBLIC void CALL cms_task_yield() {
+void cms_task_yield() {
 	cms_task_delay(0);
 }

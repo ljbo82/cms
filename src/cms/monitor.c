@@ -20,14 +20,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "scheduler_private.h"
+#include "_scheduler.h"
 
 #include <cms/monitor.h>
 #include <cms/system.h>
 
 #include <stdlib.h>
 
-PUBLIC void CALL cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
+void cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, uint64_t millis, bool allEvents) {
 	cms_task_t* activeTask = cms_scheduler_get_active_task();
 
 	if (activeTask == NULL)
@@ -43,7 +43,7 @@ PUBLIC void CALL cms_monitor_wait(cms_monitor_t* monitor, cms_events_t events, u
 	longjmp(_scheduler->jmpBuf, 1);
 }
 
-PUBLIC void CALL cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, bool append) {
+void cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events, bool append) {
 	if (append) {
 		monitor->events |= events;
 	} else {
@@ -51,11 +51,11 @@ PUBLIC void CALL cms_monitor_notify(cms_monitor_t* monitor, cms_events_t events,
 	}
 }
 
-PUBLIC void CALL cms_monitor_clear_events(cms_monitor_t* monitor, cms_events_t events) {
+void cms_monitor_clear_events(cms_monitor_t* monitor, cms_events_t events) {
 	monitor->events &= ~events;
 }
 
-PUBLIC bool CALL cms_monitor_check_events(cms_monitor_t* monitor, cms_events_t events, bool allEvents, bool clear) {
+bool cms_monitor_check_events(cms_monitor_t* monitor, cms_events_t events, bool allEvents, bool clear) {
 	cms_events_t matchedEvents = (monitor->events & events);
 
 	if (matchedEvents != 0) {

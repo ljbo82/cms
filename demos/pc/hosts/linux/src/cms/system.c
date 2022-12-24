@@ -20,14 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <watchdog_private.h>
+#include <cms/system.h>
 
-#include <avr/wdt.h>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
 
-void _watchdog_init() {
-	wdt_enable(WDTO_1S);
+uint64_t cms_system_timestamp() {
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	return (now.tv_sec * 1000000 + now.tv_usec) / 1000;
 }
 
-void _watchdog_reset() {
-	wdt_reset();
+void cmd_system_process_events() {
+	 usleep(5*1000);   /*Sleep for 5 millisecond*/
 }

@@ -22,4 +22,4 @@ ifeq ($(ARDUINO_CORE_DIR),)
     $(error [ARDUINO_CORE_DIR] Mising value)
 endif
 
-LIB_PROJECTS += $(ARDUINO_CORE_DIR):arduino-core1
+LIB_PROJECTS += $(ARDUINO_CORE_DIR):arduino-core

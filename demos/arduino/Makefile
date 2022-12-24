@@ -21,15 +21,13 @@
 PROJ_NAME = blink
 PROJ_TYPE = app
 
-LIB_PROJECTS += ../..:cms0
-
-# NOTE: When cms is built for arduino, arduino core will be built too
-LDFLAGS += -larduino-core1
+LIB_PROJECTS += ../..
+LIBS += cms0 arduino-core1
 
 export HOST ?= arduino-avr-uno
 
-ARDUINO_BUILDER     ?= ../../builder/arduino-builder
-CPP_PROJECT_BUILDER ?= ../../builder/cpp-project-builder
+ARDUINO_BUILDER     ?= ../../make/arduino-builder
+CPP_PROJECT_BUILDER ?= ../../make/cpp-project-builder-core
 
 include $(ARDUINO_BUILDER)/layers.mk
 include $(CPP_PROJECT_BUILDER)/builder.mk

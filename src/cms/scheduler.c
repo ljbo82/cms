@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "scheduler_private.h"
+#include "_scheduler.h"
 
 #include <cms/system.h>
 
@@ -80,7 +80,7 @@ static void __do_cleanup() {
 
 _cms_scheduler_t* _scheduler = &__scheduler;
 
-PUBLIC cms_task_t* CALL cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
+cms_task_t* cms_scheduler_create_task (cms_task_fn taskFn, void* taskData, cms_destructor_fn destructor) {
 	if (taskFn == NULL)
 		return NULL;
 
@@ -121,7 +121,7 @@ PUBLIC cms_task_t* CALL cms_scheduler_create_task (cms_task_fn taskFn, void* tas
 	return task;
 }
 
-PUBLIC bool CALL cms_scheduler_start() {
+bool cms_scheduler_start() {
 	if (_scheduler->running || _scheduler->first == NULL)
 		return false;
 
@@ -155,11 +155,11 @@ PUBLIC bool CALL cms_scheduler_start() {
 	return true;
 }
 
-PUBLIC cms_task_t* CALL cms_scheduler_get_active_task() {
+cms_task_t* cms_scheduler_get_active_task() {
 	return _scheduler->activeTaskNode == NULL ? NULL : _scheduler->activeTaskNode->task;
 }
 
-PUBLIC void CALL cms_scheduler_stop(bool now) {
+void cms_scheduler_stop(bool now) {
 	if (!_scheduler->running)
 		return;
 

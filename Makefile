@@ -22,23 +22,8 @@ PROJ_NAME  := cms
 PROJ_TYPE  := lib
 LIB_TYPE   ?= static
 
-ARDUINO_BUILDER     ?= builder/arduino-builder
-CPP_PROJECT_BUILDER ?= builder/cpp-project-builder
+ARDUINO_BUILDER     ?= make/arduino-builder
+CPP_PROJECT_BUILDER ?= make/cpp-project-builder-core
 
 include $(ARDUINO_BUILDER)/layers.mk
-
-# Since LIB_TYPE will be defined after platform layers are processed,
-# includes project.mk instead of builder.mk in order to fully parse project
-# data prior to compiler management.
-include $(CPP_PROJECT_BUILDER)/project.mk
-
-# At this point, LIB_TYPE is defined, but compiler management did not took
-# place yet.
-
-# Source code use special decorators when building a shared library
-ifeq ($(LIB_TYPE),shared)
-    CFLAGS += -DBUILD_SHARED_LIB
-	CFLAGS += -fvisibility=hidden
-endif
-
 include $(CPP_PROJECT_BUILDER)/builder.mk

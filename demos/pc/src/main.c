@@ -22,7 +22,7 @@ SOFTWARE.
 
 #include <cms.h>
 
-#include <iostream>
+#include <stdio.h>
 
 #define EVT1     (1 << 0)
 #define EVT2     (1 << 1)
@@ -30,18 +30,18 @@ SOFTWARE.
 
 static cms_monitor_t __listenTaskMonitor = { 0 };
 
-static void CALL __destructor(void* data) {
-	std::cout << "destructor" << std::endl;
+static void __destructor(void* data) {
+	printf("destructor\n");;
 }
 
-static void CALL __led_task(void* data) {
+static void __led_task(void* data) {
 	static bool ledState = false;
-	std::cout << "[LED] " << (ledState ? "ON" : "OFF") << std::endl;
+	printf("[LED] %s\n", ledState ? "ON" : "OFF");
 	ledState = !ledState;
 	cms_task_delay(1000);
 }
 
-static void CALL __notify_task(void* data) {
+static void __notify_task(void* data) {
 	static int counter = 0;
 
 	if (counter != 0 && counter % 10 == 0)
@@ -56,20 +56,20 @@ static void CALL __notify_task(void* data) {
 	if (counter == 40)
 		cms_monitor_notify(&__listenTaskMonitor, EVT_STOP, true);
 
-	std::cout << "[NOTIFY] counter: " << counter << std::endl;
+	printf("[NOTIFY] counter: %d\n", counter);
 	counter++;
 	cms_task_delay(1000);
 }
 
-static void CALL __listen_task(void* data) {
+static void __listen_task(void* data) {
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT1, false, false))
-		std::cout << "[LISTEN] Detected EVT1" << std::endl;
+		printf("[LISTEN] Detected EVT1\n");
 
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT2, false, false))
-		std::cout << "[LISTEN] Detected EVT2" << std::endl;
+		printf("[LISTEN] Detected EVT2\n");
 
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT_STOP, false, false)) {
-		std::cout << "[LISTEN] Detected EVT_STOP" << std::endl;
+		printf("[LISTEN] Detected EVT_STOP\n");
 		cms_scheduler_stop(false);
 	}
 
@@ -79,8 +79,8 @@ static void CALL __listen_task(void* data) {
 }
 
 int main() {
-	cms_scheduler_create_task(__listen_task, nullptr, __destructor);
-	cms_scheduler_create_task(__led_task, nullptr, __destructor);
-	cms_scheduler_create_task(__notify_task, nullptr, __destructor);
+	cms_scheduler_create_task(__listen_task, NULL, __destructor);
+	cms_scheduler_create_task(__led_task, NULL, __destructor);
+	cms_scheduler_create_task(__notify_task, NULL, __destructor);
 	cms_scheduler_start();
 }

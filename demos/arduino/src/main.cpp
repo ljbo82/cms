@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "watchdog_private.h"
+#include "_watchdog.h"
 
 #include <cms.h>
 
@@ -55,22 +55,22 @@ static void __notify_task(void* data) {
 
 	Serial.print("[NOTIFY] Counter: ");
 	Serial.print(counter);
-	Serial.print("\r\n");
+	Serial.print("\n");
 	counter++;
 	cms_task_delay(1000);
 }
 
 static void __listen_task(void* data) {
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT1, false, false))
-		Serial.print("[LISTEN] Detected EVT1\r\n");
+		Serial.print("[LISTEN] Detected EVT1\n");
 
 	if (cms_monitor_check_events(&__listenTaskMonitor, EVT2, false, false))
-		Serial.print("[LISTEN] Detected EVT2\r\n");
+		Serial.print("[LISTEN] Detected EVT2\n");
 
 	bool stop = cms_monitor_check_events(&__listenTaskMonitor, EVT_STOP, false, false);
 
 	if (stop) {
-		Serial.print("[LISTEN] Detected EVT_STOP (watchdog will reset the board)\r\n");
+		Serial.print("[LISTEN] Detected EVT_STOP (watchdog will reset the board)\n");
 		while(true) {
 			// Never returns to the scheduler (watchdog will timeout).
 		}
@@ -96,7 +96,7 @@ void setup() {
 
 	_watchdog_init();
 
-	Serial.print("Firmware is ready!\r\n");
+	Serial.print("Firmware is ready!\n");
 }
 
 void loop() {

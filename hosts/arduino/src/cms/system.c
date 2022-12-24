@@ -24,10 +24,10 @@ SOFTWARE.
 
 #include <Arduino.h>
 
-PUBLIC uint64_t CALL cms_system_timestamp() {
+uint64_t cms_system_timestamp() {
 	return millis();
 }
 
-PUBLIC void CALL cmd_system_process_events() {
+void cmd_system_process_events() {
 	// Does nothing
 }

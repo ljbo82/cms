@@ -32,40 +32,6 @@ SOFTWARE.
 #include <stddef.h>
 #include <stdint.h>
 
-// NOTE: By default, lib is intended to be static library
-#if defined _WIN32 || defined __CYGWIN__
-	#if defined (BUILD_SHARED_LIB) || defined (USE_SHARED_LIB)
-		#ifdef BUILD_SHARED_LIB
-			/** @internal */
-			#define PUBLIC __declspec(dllexport)
-		#else
-			/** @internal */
-			#define PUBLIC __declspec(dllimport)
-		#endif
-	#else
-		#define PUBLIC
-	#endif
-
-	/** @internal */
-	#define CALL __cdecl
-#else
-	#ifdef BUILD_SHARED_LIB
-		#if __GNUC__ >= 4
-			/** @internal */
-			#define PUBLIC __attribute__ ((visibility ("default")))
-		#else
-			/** @internal */
-			#define PUBLIC
-		#endif
-	#else
-		/** @internal */
-		#define PUBLIC
-	#endif
-
-	/** @internal */
-	#define CALL
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -39,7 +39,7 @@ extern "C" {
  *       be larger than a millisecond.
  *
  * @return System timestamp in milliseconds. */
-PUBLIC uint64_t CALL cms_system_timestamp();
+uint64_t cms_system_timestamp();
 
 /**
  * @brief Process system events.
@@ -47,7 +47,7 @@ PUBLIC uint64_t CALL cms_system_timestamp();
  * This function will be called periodically by the scheduler in order to
  * allow external events to be processed.
  */
-PUBLIC void CALL cmd_system_process_events();
+void cmd_system_process_events();
 
 #ifdef __cplusplus
 } // extern "C"

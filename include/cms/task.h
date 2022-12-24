@@ -40,12 +40,12 @@ extern "C" {
  * @param millis Delay interval in milliseconds. Passing zero is equivalent
  *        to {@link cms_task_yield()}.
  */
-PUBLIC void CALL cms_task_delay(
+void cms_task_delay(
 	uint64_t millis
 );
 
 /** @brief Causes the execution to return to the scheduler. */
-PUBLIC void CALL cms_task_yield();
+void cms_task_yield();
 
 #ifdef __cplusplus
 } // extern "C"

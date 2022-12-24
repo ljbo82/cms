@@ -18,8 +18,8 @@
             "includePath": [
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/demo/arduino/src",
-                "${workspaceFolder}/demo/arduino/output/arduino-avr-uno/release/dist/include"
+                "${workspaceFolder}/demos/arduino/src",
+                "${workspaceFolder}/demos/arduino/output/arduino-avr-uno/release/dist/include"
             ],
             "compilerArgs": ["-mmcu=atmega328p"],
             "defines": [
