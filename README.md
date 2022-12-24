@@ -10,6 +10,8 @@ Currently only Arduino boards are supported, although adding support for other t
 
 This project is distributed under MIT License. Please see the [LICENSE](LICENSE) file for details on copying and distribution.
 
+Usage examples are under public domain.
+
 ## Contact
 
 For general information visit the main project site at https://github.com/ljbo82/cms.
